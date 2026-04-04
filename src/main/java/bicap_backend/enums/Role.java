@@ -1,4 +1,8 @@
 package bicap_backend.enums;
 
-public class Role {
+public enum Role {
+    ADMIN,
+    FARM_MANAGER,
+    RETAILER,
+    GUEST
 }
