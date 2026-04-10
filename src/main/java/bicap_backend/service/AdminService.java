@@ -20,7 +20,7 @@ public class AdminService {
 
 
     
-    // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //
+     // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //
 
     public List<FarmResponse> getAllFarms() {
         return farmRepository.findAll().stream()
@@ -40,6 +40,18 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy Farm với ID: " + farmId));
 
         farm.setStatus(FarmStatus.APPROVED);
+        return mapToFarmResponse(farmRepository.save(farm));
+    }
+
+    @Transactional
+    public FarmResponse rejectFarm(Long farmId, FarmRejectRequest request) {
+        Farm farm = farmRepository.findById(farmId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Farm với ID: " + farmId));
+
+        farm.setStatus(FarmStatus.REJECTED);
+        // Lưu lý do từ chối (Ví dụ in ra log hoặc gửi Email)
+        System.out.println("Từ chối Farm " + farmId + " vì lý do: " + request.getReason());
+
         return mapToFarmResponse(farmRepository.save(farm));
     }
 
