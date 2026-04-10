@@ -1,5 +1,6 @@
 package bicap_backend.controller;
 
+import bicap_backend.dto.request.FarmRejectRequest;
 import bicap_backend.dto.response.FarmResponse;
 import bicap_backend.enums.FarmStatus;
 import bicap_backend.service.AdminService;
@@ -27,6 +28,9 @@ public class AdminController {
         }
         return ResponseEntity.ok(adminService.getAllFarms());
     }
+@PutMapping("/farms/{farmId}/approve")
+    public ResponseEntity<FarmResponse> approveFarm(@PathVariable Long farmId) {
+        return ResponseEntity.ok(adminService.approveFarm(farmId));
+    }
 
-    
 }
