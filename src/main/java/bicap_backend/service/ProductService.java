@@ -8,6 +8,7 @@ import bicap_backend.enums.ProductStatus;
 import bicap_backend.repository.IFarmingSeasonRepository;
 import bicap_backend.repository.IProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +33,15 @@ public class ProductService {
         return toResponse(product);
     }
 
-    public ProductResponse getAll(String name, Pageable pageable) {
-//      TODO: LOGIC LẤY TẤT CẢ SẢN PHẨM
-        return null;
+    public Page<ProductResponse> getAll(String name, Pageable pageable) {
+        if (name != null && !name.isBlank()) {
+            return productRepository
+                    .findByNameContainingIgnoreCaseAndStatus(name, ProductStatus.AVAILABLE, pageable)
+                    .map(this::toResponse);
+        }
+        return productRepository
+                .findByStatus(ProductStatus.AVAILABLE, pageable)
+                .map(this::toResponse);
     }
 
     public ProductResponse getById(Long id) {
