@@ -8,6 +8,7 @@ import bicap_backend.enums.FarmStatus;
 import bicap_backend.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // Chỉ có Admin mới được vào các API này
 public class AdminController {
 
     private final AdminService adminService;
