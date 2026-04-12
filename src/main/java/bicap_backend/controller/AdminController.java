@@ -17,12 +17,16 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    
+
     // ----- [BICAP-73] & [BICAP-74] QUẢN LÝ USER ----- //
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
+    }
+    @PutMapping("/users/{userId}/lock")
+    public ResponseEntity<UserResponse> toggleUserLock(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.toggleUserLock(userId));
     }
 
     // ----- [BICAP-70], [BICAP-71], [BICAP-72] QUẢN LÝ TÀI KHOẢN FARM ----- //

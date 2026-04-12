@@ -4,6 +4,7 @@ import bicap_backend.dto.request.FarmRejectRequest;
 import bicap_backend.dto.response.FarmResponse;
 import bicap_backend.dto.response.UserResponse;
 import bicap_backend.enity.Farm;
+import bicap_backend.enity.User;
 import bicap_backend.enums.FarmStatus;
 import bicap_backend.repository.IFarmRepository;
 import bicap_backend.repository.IUserRepository;
@@ -30,6 +31,15 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public UserResponse toggleUserLock(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy User với ID: " + userId));
+
+        // Đảo ngược trạng thái khóa (true -> false, false -> true)
+        user.setActive(!user.isActive());
+        return mapToUserResponse(userRepository.save(user));
+    }
     
      // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //
 
