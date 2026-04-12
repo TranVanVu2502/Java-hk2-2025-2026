@@ -2,6 +2,7 @@ package bicap_backend.service;
 
 import bicap_backend.dto.request.FarmRejectRequest;
 import bicap_backend.dto.response.FarmResponse;
+import bicap_backend.dto.response.StatsResponse;
 import bicap_backend.dto.response.UserResponse;
 import bicap_backend.enity.Farm;
 import bicap_backend.enity.User;
@@ -22,6 +23,20 @@ public class AdminService {
     private final IFarmRepository farmRepository;
     private final IUserRepository userRepository;
 
+    // ----- QUẢN LÝ DỮ LIỆU THỐNG KÊ ----- //
+
+    public StatsResponse getDashboardStats() {
+        long totalFarms = farmRepository.count();
+        long totalUsers = userRepository.count();
+        // TODO: Khi tạo OrderRepository thì cập nhật ở đây
+        long totalOrders = 0;
+
+        return StatsResponse.builder()
+                .totalFarms(totalFarms)
+                .totalUsers(totalUsers)
+                .totalOrders(totalOrders)
+                .build();
+    }
 
     // ----- QUẢN LÝ USER ----- //
 
@@ -40,8 +55,8 @@ public class AdminService {
         user.setActive(!user.isActive());
         return mapToUserResponse(userRepository.save(user));
     }
-    
-     // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //
+
+    // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //
 
     public List<FarmResponse> getAllFarms() {
         return farmRepository.findAll().stream()
@@ -76,8 +91,17 @@ public class AdminService {
         return mapToFarmResponse(farmRepository.save(farm));
     }
 
-  
     // ----- CÁC HÀM MAPPER (Chuyển Entity sang Response DTO) ----- //
+
+    private UserResponse mapToUserResponse(User user) {
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .isActive(user.isActive())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
 
     private FarmResponse mapToFarmResponse(Farm farm) {
         return FarmResponse.builder()
