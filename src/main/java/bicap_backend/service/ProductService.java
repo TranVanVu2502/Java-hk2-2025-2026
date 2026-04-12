@@ -45,8 +45,9 @@ public class ProductService {
     }
 
     public ProductResponse getById(Long id) {
-//      TODO: LOGIC TÌM SẢN PHẨM THEO ID
-        return null;
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+        return toResponse(product);
     }
 
     private ProductResponse toResponse(Product p) {
