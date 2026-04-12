@@ -2,9 +2,11 @@ package bicap_backend.service;
 
 import bicap_backend.dto.request.FarmRejectRequest;
 import bicap_backend.dto.response.FarmResponse;
+import bicap_backend.dto.response.UserResponse;
 import bicap_backend.enity.Farm;
 import bicap_backend.enums.FarmStatus;
 import bicap_backend.repository.IFarmRepository;
+import bicap_backend.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +19,16 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private final IFarmRepository farmRepository;
+    private final IUserRepository userRepository;
 
+
+    // ----- QUẢN LÝ USER ----- //
+
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+    }
 
     
      // ----- QUẢN LÝ FARM (NHÀ VƯỜN) ----- //

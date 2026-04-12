@@ -2,6 +2,7 @@ package bicap_backend.controller;
 
 import bicap_backend.dto.request.FarmRejectRequest;
 import bicap_backend.dto.response.FarmResponse;
+import bicap_backend.dto.response.UserResponse;
 import bicap_backend.enums.FarmStatus;
 import bicap_backend.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,13 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    
+    // ----- [BICAP-73] & [BICAP-74] QUẢN LÝ USER ----- //
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(adminService.getAllUsers());
+    }
 
     // ----- [BICAP-70], [BICAP-71], [BICAP-72] QUẢN LÝ TÀI KHOẢN FARM ----- //
 
