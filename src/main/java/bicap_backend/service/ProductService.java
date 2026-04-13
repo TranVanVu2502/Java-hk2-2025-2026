@@ -12,22 +12,21 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
     private final IProductRepository productRepository;
-//    private final IFarmingSeasonRepository seasonRepository;
+    // private final IFarmingSeasonRepository seasonRepository;
 
     public ProductResponse create(ProductRequest request) {
-//      TODO: Logic TẠO SẢN PHẨM
+        // TODO: Logic TẠO SẢN PHẨM
         return null;
     }
 
     public ProductResponse getAll(String name, Pageable pageable) {
-//      TODO: LOGIC LẤY TẤT CẢ SẢN PHẨM
+        // TODO: LOGIC LẤY TẤT CẢ SẢN PHẨM
         return null;
     }
 
     public ProductResponse getById(Long id) {
-//      TODO: LOGIC TÌM SẢN PHẨM THEO ID
+        // TODO: LOGIC TÌM SẢN PHẨM THEO ID
         return null;
     }
 
 }
-
