@@ -1,44 +1,43 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-
 import { AuthProvider } from './context/AuthContext';
 
-import ProtectedRoute from './components/ProtectedRoute';
-import DashboardLayout from './components/DashboardLayout';
 
+// Auth
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+
+// Guest (Các trang công khai đã hoàn thiện)
 import ProductsPage from './pages/guest/ProductsPage';
+import ProductDetailPage from './pages/guest/ProductDetailPage';
+import QRLookupPage from './pages/guest/QRLookupPage';
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster position="top-right" />
-        
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3500,
+            style: { borderRadius: '12px', fontFamily: "'Inter', sans-serif", fontSize: '14px' },
+          }}
+        />
         <Routes>
-          {/* ── Public Routes ── */}
+          {/* ── Auth ── */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/" element={<Navigate to="/products" replace />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-          {/* ── Private Routes (Cấu trúc mẫu) ── */}
-          <Route 
-            path="/admin/*" 
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <DashboardLayout>
-                  <Routes>
-                    <Route path="dashboard" element={<div>Admin Dashboard</div>} />
-                    {/* Thêm các route admin khác ở đây */}
-                  </Routes>
-                </DashboardLayout>
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="*" element={<Navigate to="/products" replace />} />
 
-          {/* ── Error Routes ── */}
-          <Route path="/unauthorized" element={<h2>Không có quyền truy cập</h2>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/unauthorized" element={
+            <div style={{ textAlign: 'center', padding: '80px', fontFamily: 'Inter, sans-serif' }}>
+              <h1 style={{ fontSize: 48 }}>🚧</h1>
+              <h2>Tính năng đang được phát triển</h2>
+              <p>Vui lòng quay lại sau.</p>
+              <a href="/" style={{ color: '#10b981', fontWeight: 'bold' }}>Quay lại cửa hàng</a>
+            </div>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
