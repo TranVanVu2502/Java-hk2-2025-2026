@@ -26,15 +26,15 @@ public class SeasonService {
     private final IUserRepository userRepository;
 
     // ─────────────────────────────────────────────────────────────
-    // TẠO MÙA VỤ MỚI
+    // BICAP-62: TẠO MÙA VỤ MỚI
+    // farmId lấy từ path variable, không cần trong body
     // ─────────────────────────────────────────────────────────────
     @Transactional
-    public SeasonResponse create(SeasonRequest request) {
-        // Lấy user hiện tại từ JWT
+    public SeasonResponse create(Long farmId, SeasonRequest request) {
         User user = getCurrentUser();
 
-        // Kiểm tra farm tồn tại và thuộc về user này
-        Farm farm = farmRepository.findById(request.getFarmId())
+        // Kiểm tra farm tồn tại và thuộc về user hiện tại
+        Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
         if (!farm.getUserId().equals(user.getUserId())) {
@@ -53,17 +53,40 @@ public class SeasonService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // CẬP NHẬT THÔNG TIN MÙA VỤ
+    // BICAP-63: LẤY DANH SÁCH MÙA VỤ THEO FARM
+    // ─────────────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<SeasonResponse> getByFarmId(Long farmId) {
+        farmRepository.findById(farmId)
+                .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
+
+        return seasonRepository.findByFarmId(farmId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // BICAP-64: LẤY CHI TIẾT MÙA VỤ THEO ID
+    // ─────────────────────────────────────────────────────────────
+    @Transactional(readOnly = true)
+    public SeasonResponse getById(Long seasonId) {
+        Season season = seasonRepository.findById(seasonId)
+                .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
+
+        return toResponse(season);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // BICAP-65: CẬP NHẬT THÔNG TIN MÙA VỤ
     // ─────────────────────────────────────────────────────────────
     @Transactional
     public SeasonResponse update(Long seasonId, SeasonRequest request) {
-        // Lấy user hiện tại từ JWT
         User user = getCurrentUser();
 
         Season season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
-        // Kiểm tra farm của mùa vụ thuộc về user này
         Farm farm = farmRepository.findById(season.getFarmId())
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
@@ -76,7 +99,6 @@ public class SeasonService {
             throw new RuntimeException("Chỉ có thể cập nhật mùa vụ đang IN_PROGRESS");
         }
 
-        // Cập nhật các trường được phép
         season.setName(request.getName());
         season.setStartDate(request.getStartDate());
         season.setEndDate(request.getEndDate());
@@ -85,17 +107,15 @@ public class SeasonService {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // XUẤT MÙA VỤ (chuyển status → EXPORTED)
+    // BICAP-66: XUẤT MÙA VỤ → status = EXPORTED
     // ─────────────────────────────────────────────────────────────
     @Transactional
     public SeasonResponse export(Long seasonId) {
-        // Lấy user hiện tại từ JWT
         User user = getCurrentUser();
 
         Season season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
-        // Kiểm tra quyền sở hữu
         Farm farm = farmRepository.findById(season.getFarmId())
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
@@ -111,32 +131,6 @@ public class SeasonService {
         season.setStatus(SeasonStatus.EXPORTED);
 
         return toResponse(seasonRepository.save(season));
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // LẤY DANH SÁCH MÙA VỤ THEO FARM
-    // ─────────────────────────────────────────────────────────────
-    @Transactional(readOnly = true)
-    public List<SeasonResponse> getByFarmId(Long farmId) {
-        // Kiểm tra farm tồn tại
-        farmRepository.findById(farmId)
-                .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
-
-        return seasonRepository.findByFarmId(farmId)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // LẤY CHI TIẾT MÙA VỤ THEO ID
-    // ─────────────────────────────────────────────────────────────
-    @Transactional(readOnly = true)
-    public SeasonResponse getById(Long seasonId) {
-        Season season = seasonRepository.findById(seasonId)
-                .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
-
-        return toResponse(season);
     }
 
     // ─────────────────────────────────────────────────────────────

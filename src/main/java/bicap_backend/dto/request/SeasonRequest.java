@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class SeasonRequest {
 
-    private Long farmId;
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
