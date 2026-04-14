@@ -16,13 +16,29 @@ public class FarmController {
 
     private final FarmService farmService;
 
-    @PostMapping("/register")
-    public ResponseEntity<FarmResponse> registerFarm(@RequestBody FarmRequest request) {
-        return ResponseEntity.ok(farmService.registerFarm(request));
+    @PostMapping
+    public ResponseEntity<FarmResponse> create(@RequestBody FarmRequest request) {
+        return ResponseEntity.ok(farmService.create(request));
     }
 
-    @GetMapping("/my-farms/{userId}")
-    public ResponseEntity<List<FarmResponse>> getMyFarms(@PathVariable Long userId) {
-        return ResponseEntity.ok(farmService.getMyFarms(userId));
+    @GetMapping("/my-farms")
+    public ResponseEntity<List<FarmResponse>> getMyFarms() {
+        return ResponseEntity.ok(farmService.getMyFarms());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FarmResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(farmService.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FarmResponse> update(@PathVariable Long id, @RequestBody FarmRequest request) {
+        return ResponseEntity.ok(farmService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        farmService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
