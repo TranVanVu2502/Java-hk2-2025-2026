@@ -41,7 +41,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @PrePersist
     protected void onCreate() {
@@ -68,6 +68,6 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return isActive; }
+    public boolean isEnabled() { return active; }
 
 }
