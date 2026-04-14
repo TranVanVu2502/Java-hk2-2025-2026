@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ISeasonRepository extends JpaRepository<Season, Long> {
+public interface IFarmingSeasonRepository extends JpaRepository<Season, Long> {
 
     List<Season> findByFarmId(Long farmId);
 
