@@ -9,6 +9,7 @@ import bicap_backend.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         // Kiểm tra email đã tồn tại chưa
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -29,20 +31,15 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .isActive(true)
+                .active(true)
                 .build();
 
         userRepository.save(user);
 
-        // Tạo token và trả về
-        String token = jwtTokenProvider.generateToken(user);
-        return AuthResponse.builder()
-                .token(token)
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
+        return generateAuthResponse(user);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         // Tìm user theo email
         User user = userRepository.findByEmail(request.getEmail())
@@ -58,6 +55,11 @@ public class AuthService {
             throw new RuntimeException("Tài khoản đã bị khoá");
         }
 
+        return generateAuthResponse(user);
+    }
+
+//    Tạo token
+    private AuthResponse generateAuthResponse(User user) {
         String token = jwtTokenProvider.generateToken(user);
         return AuthResponse.builder()
                 .token(token)
