@@ -3,11 +3,11 @@ package bicap_backend.service;
 import bicap_backend.dto.request.SeasonRequest;
 import bicap_backend.dto.response.SeasonResponse;
 import bicap_backend.enity.Farm;
-import bicap_backend.enity.Season;
+import bicap_backend.enity.FarmingSeason;
 import bicap_backend.enity.User;
 import bicap_backend.enums.SeasonStatus;
 import bicap_backend.repository.IFarmRepository;
-import bicap_backend.repository.ISeasonRepository;
+import bicap_backend.repository.IFarmingSeasonRepository;
 import bicap_backend.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SeasonService {
 
-    private final ISeasonRepository seasonRepository;
+    private final IFarmingSeasonRepository seasonRepository;
     private final IFarmRepository farmRepository;
     private final IUserRepository userRepository;
 
@@ -37,12 +37,12 @@ public class SeasonService {
         Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền tạo mùa vụ cho farm này");
         }
 
-        Season season = Season.builder()
-                .farmId(farm.getFarmId())
+        FarmingSeason season = FarmingSeason.builder()
+                .farm(farm)
                 .name(request.getName())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
@@ -71,7 +71,7 @@ public class SeasonService {
     // ─────────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public SeasonResponse getById(Long seasonId) {
-        Season season = seasonRepository.findById(seasonId)
+        FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
         return toResponse(season);
@@ -84,13 +84,13 @@ public class SeasonService {
     public SeasonResponse update(Long seasonId, SeasonRequest request) {
         User user = getCurrentUser();
 
-        Season season = seasonRepository.findById(seasonId)
+        FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
-        Farm farm = farmRepository.findById(season.getFarmId())
+        Farm farm = farmRepository.findById(season.getFarm().getFarmId())
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền cập nhật mùa vụ này");
         }
 
@@ -113,13 +113,13 @@ public class SeasonService {
     public SeasonResponse export(Long seasonId) {
         User user = getCurrentUser();
 
-        Season season = seasonRepository.findById(seasonId)
+        FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
-        Farm farm = farmRepository.findById(season.getFarmId())
+        Farm farm = farmRepository.findById(season.getFarm().getFarmId())
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền xuất mùa vụ này");
         }
 
@@ -145,10 +145,10 @@ public class SeasonService {
     // ─────────────────────────────────────────────────────────────
     // HELPER: Map entity → response DTO
     // ─────────────────────────────────────────────────────────────
-    private SeasonResponse toResponse(Season season) {
+    private SeasonResponse toResponse(FarmingSeason season) {
         return SeasonResponse.builder()
                 .seasonId(season.getSeasonId())
-                .farmId(season.getFarmId())
+                .farmId(season.getFarm().getFarmId())
                 .name(season.getName())
                 .startDate(season.getStartDate())
                 .endDate(season.getEndDate())

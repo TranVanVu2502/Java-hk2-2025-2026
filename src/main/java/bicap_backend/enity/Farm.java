@@ -20,8 +20,9 @@ public class Farm {
     @Column(name = "farm_id")
     private Long farmId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, length = 150)
     private String name;

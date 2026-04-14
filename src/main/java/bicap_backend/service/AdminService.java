@@ -106,7 +106,6 @@ public class AdminService {
     private FarmResponse mapToFarmResponse(Farm farm) {
         return FarmResponse.builder()
                 .farmId(farm.getFarmId())
-                .userId(farm.getUser().getUserId())
                 .name(farm.getName())
                 .address(farm.getAddress())
                 .businessLicense(farm.getBusinessLicense())

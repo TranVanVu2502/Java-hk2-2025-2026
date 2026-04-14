@@ -15,15 +15,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @Table(name = "farming_season")
-public class Season {
+public class FarmingSeason {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "season_id")
     private Long seasonId;
 
-    @Column(name = "farm_id", nullable = false)
-    private Long farmId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -33,6 +34,9 @@ public class Season {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

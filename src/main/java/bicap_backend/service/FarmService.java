@@ -31,7 +31,7 @@ public class FarmService {
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
         Farm farm = Farm.builder()
-                .userId(user.getUserId())
+                .user(user)
                 .name(request.getName())
                 .address(request.getAddress())
                 .businessLicense(request.getBusinessLicense())
@@ -68,7 +68,7 @@ public class FarmService {
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
         // Kiểm tra quyền sở hữu
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền truy cập farm này");
         }
 
@@ -87,7 +87,7 @@ public class FarmService {
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
         // Kiểm tra quyền sở hữu
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền cập nhật farm này");
         }
 
@@ -112,7 +112,7 @@ public class FarmService {
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
         // Kiểm tra quyền sở hữu
-        if (!farm.getUserId().equals(user.getUserId())) {
+        if (!farm.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Không có quyền xóa farm này");
         }
 
