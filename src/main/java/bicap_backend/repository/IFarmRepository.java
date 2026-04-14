@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface IFarmRepository extends JpaRepository<Farm, Long> {
     List<Farm> findByStatus(FarmStatus status);
-    List<Farm> findByUserUserId(Long userId);
+    List<Farm> findByUserId(Long userId);
 }
