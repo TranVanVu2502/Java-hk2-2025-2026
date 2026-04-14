@@ -2,15 +2,7 @@ package bicap_backend.enity;
 
 import bicap_backend.enums.FarmStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "farm")
 public class Farm {
@@ -20,8 +12,9 @@ public class Farm {
     @Column(name = "farm_id")
     private Long farmId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -37,6 +30,28 @@ public class Farm {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
     private FarmStatus status = FarmStatus.PENDING;
+
+    // Getters and Setters
+
+    public Long getFarmId() { return farmId; }
+    public void setFarmId(Long farmId) { this farmId = farmId; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this user = user; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this name = name; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this address = address; }
+
+    public String getBusinessLicense() { return businessLicense; }
+    public void setBusinessLicense(String businessLicense) { this businessLicense = businessLicense; }
+
+    public String getOwnerName() { return ownerName; }
+    public void setOwnerName(String ownerName) { this ownerName = ownerName; }
+
+    public FarmStatus getStatus() { return status; }
+    public void setStatus(FarmStatus status) { this status = status; }
 }
