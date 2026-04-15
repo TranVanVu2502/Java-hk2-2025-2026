@@ -1,13 +1,16 @@
+// service/OrderService.java
 package bicap_backend.service;
 
 import bicap_backend.dto.request.OrderRequest;
 import bicap_backend.dto.response.OrderResponse;
 import bicap_backend.enity.*;
+import bicap_backend.enums.OrderStatus;
 import bicap_backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,82 +20,90 @@ public class OrderService {
 
     private final IOrderRepository orderRepository;
     private final IOrderDetailRepository orderDetailRepository;
+    private final IUserRepository userRepository;
     private final IRetailerRepository retailerRepository;
-    private final IFarmRepository farmRepository;
-    private final IProductRepository productRepository;
 
-    // ===== CREATE ORDER =====
+    @Transactional
     public OrderResponse createOrder(OrderRequest request) {
 
-        Retailer retailer = retailerRepository.findById(request.getRetailerId())
-                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
-        Farm farm = farmRepository.findById(request.getFarmId())
-                .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Retailer retailer = retailerRepository
+                .findById(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
 
         Order order = Order.builder()
                 .retailer(retailer)
-                .farm(farm)
-                .status("PENDING")
-                .createdAt(LocalDateTime.now())
+                .status(OrderStatus.PENDING)
                 .build();
 
-        Order savedOrder = orderRepository.save(order);
+        orderRepository.save(order);
 
-        List<String> productNames = new ArrayList<>();
+        List<OrderDetail> details = new ArrayList<>();
 
         for (var item : request.getItems()) {
-
-            Product product = productRepository.findById(item.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
-
-            OrderDetail detail = OrderDetail.builder()
-                    .order(savedOrder)
-                    .product(product)
-                    .quantity(item.getQuantity())
-                    .build();
-
-            orderDetailRepository.save(detail);
-
-            productNames.add(product.getName());
+            OrderDetail detail = new OrderDetail();
+            detail.setOrder(order);
+            detail.setQuantity(item.getQuantity());
+            detail.setPrice(item.getPrice());
+            details.add(detail);
         }
 
+        orderDetailRepository.saveAll(details);
+
         return OrderResponse.builder()
-                .orderId(savedOrder.getOrderId())
-                .retailerId(retailer.getRetailerId())
-                .farmId(farm.getFarmId())
-                .status(savedOrder.getStatus())
-                .products(productNames)
+                .orderId(order.getOrderId())
+                .status(order.getStatus())
                 .build();
     }
 
-    // ===== GET ALL ORDER OF RETAILER =====
-    public List<Order> getOrdersByRetailer(Long retailerId) {
-        return orderRepository.findByRetailer_RetailerId(retailerId);
+    public List<OrderResponse> getOrdersByRetailer() {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Retailer retailer = retailerRepository
+                .findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+
+        List<Order> orders = orderRepository.findByRetailer_RetailerId(retailer.getRetailerId());
+
+        return orders.stream()
+                .map(order -> OrderResponse.builder()
+                        .orderId(order.getOrderId())
+                        .status(order.getStatus())
+                        .build())
+                .toList();
     }
 
-    // ===== GET ORDER DETAIL =====
-    public Order getOrder(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
+    public OrderResponse getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy order"));
+
+        return OrderResponse.builder()
+                .orderId(order.getOrderId())
+                .status(order.getStatus())
+                .build();
     }
 
-    // ===== CANCEL =====
     public void cancelOrder(Long id) {
-        Order order = getOrder(id);
-        order.setStatus("CANCELLED");
-        orderRepository.save(order);
-    }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy order"));
 
-    // ===== CONFIRM =====
-    public void confirmOrder(Long id) {
-        Order order = getOrder(id);
-        order.setStatus("CONFIRMED");
-        orderRepository.save(order);
-    }
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Chỉ huỷ đơn hàng đang chờ xác nhận");
+        }
 
-    // ===== FARM VIEW =====
-    public List<Order> getOrdersByFarm(Long farmId) {
-        return orderRepository.findByFarm_FarmId(farmId);
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
     }
 }
