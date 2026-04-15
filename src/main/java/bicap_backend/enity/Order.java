@@ -2,9 +2,11 @@ package bicap_backend.enity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import bicap_backend.enums.OrderStatus;
 import java.time.LocalDateTime;
 import java.util.List;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "`order`")
@@ -23,11 +25,14 @@ public class Order {
     @JoinColumn(name = "retailer_id")
     private Retailer retailer;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
     @ManyToOne
     @JoinColumn(name = "farm_id")
     private Farm farm;
 
-    private String status; // PENDING, CONFIRMED, CANCELLED
+    private String Status;
 
     private LocalDateTime createdAt;
 
