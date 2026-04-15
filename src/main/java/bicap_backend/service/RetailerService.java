@@ -6,25 +6,27 @@ import bicap_backend.enity.Retailer;
 import bicap_backend.enity.User;
 import bicap_backend.repository.IRetailerRepository;
 import bicap_backend.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class RetailerService {
 
-    @Autowired
-    private IRetailerRepository retailerRepository;
+    private final IRetailerRepository retailerRepository;
+    private final IUserRepository userRepository;
 
-    @Autowired
-    private IUserRepository userRepository;
+    public RetailerResponse create(RetailerRequest request) {
 
-    // ===== 1. Đăng ký retailer =====
-    public RetailerResponse register(RetailerRequest request) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        if (retailerRepository.findByUserUserId(request.getUserId()).isPresent()) {
+        if (retailerRepository.findByUser_UserId(user.getUserId()).isPresent()) {
             throw new RuntimeException("User đã đăng ký retailer rồi");
         }
 
@@ -36,31 +38,31 @@ public class RetailerService {
 
         Retailer saved = retailerRepository.save(retailer);
 
-        // map sang response
-        RetailerResponse res = new RetailerResponse();
-        res.setRetailerId(saved.getRetailerId());
-        res.setUserId(saved.getUser().getUserId());
-        res.setName(saved.getName());
-        res.setBusinessLicense(saved.getBusinessLicense());
-        res.setAddress(saved.getAddress());
-
-        return res;
-
+        return RetailerResponse.builder()
+                .retailerId(saved.getRetailerId())
+                .name(saved.getName())
+                .businessLicense(saved.getBusinessLicense())
+                .address(saved.getAddress())
+                .build();
     }
 
-    // ===== 2. Lấy info của chính mình =====
-    public RetailerResponse getMyInfo(Long userId) {
+    public RetailerResponse getMyInfo() {
 
-        Retailer retailer = retailerRepository.findByUserUserId(userId)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Retailer retailer = retailerRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
 
-        RetailerResponse res = new RetailerResponse();
-        res.setRetailerId(retailer.getRetailerId());
-        res.setUserId(retailer.getUser().getUserId());
-        res.setName(retailer.getName());
-        res.setBusinessLicense(retailer.getBusinessLicense());
-        res.setAddress(retailer.getAddress());
-
-        return res;
+        return RetailerResponse.builder()
+                .retailerId(retailer.getRetailerId())
+                .name(retailer.getName())
+                .businessLicense(retailer.getBusinessLicense())
+                .address(retailer.getAddress())
+                .build();
     }
 }
