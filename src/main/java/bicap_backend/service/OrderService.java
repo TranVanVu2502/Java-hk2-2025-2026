@@ -95,6 +95,19 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional
+    public void confirmOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy order"));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Chỉ xác nhận đơn hàng đang chờ");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+    }
+    @Transactional
     public void cancelOrder(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy order"));
