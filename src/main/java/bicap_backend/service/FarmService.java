@@ -50,7 +50,7 @@ public class FarmService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        return farmRepository.findByUserId(user.getUserId())
+        return farmRepository.findByUserUserId(user.getUserId())
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());

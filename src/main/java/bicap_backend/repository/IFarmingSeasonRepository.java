@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface IFarmingSeasonRepository extends JpaRepository<FarmingSeason, Long> {
 
-    List<FarmingSeason> findByFarmId(Long farmId);
-
+    List<FarmingSeason> findByFarmFarmId(Long farmId);
     List<FarmingSeason> findByStatus(SeasonStatus status);
 }

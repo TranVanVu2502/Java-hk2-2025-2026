@@ -60,7 +60,7 @@ public class SeasonService {
         farmRepository.findById(farmId)
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
-        return seasonRepository.findByFarmId(farmId)
+        return seasonRepository.findByFarmFarmId(farmId)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
