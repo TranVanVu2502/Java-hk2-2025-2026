@@ -32,8 +32,6 @@ public class Order {
     @JoinColumn(name = "farm_id")
     private Farm farm;
 
-    private String Status;
-
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
