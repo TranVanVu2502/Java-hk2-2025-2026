@@ -72,7 +72,7 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
         Retailer retailer = retailerRepository
-                .findByUser_UserId(user.getUserId())
+                .findByUserUserId(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
 
         List<Order> orders = orderRepository.findByRetailer_RetailerId(retailer.getRetailerId());
