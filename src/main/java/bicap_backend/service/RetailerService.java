@@ -24,7 +24,7 @@ public class RetailerService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        if (retailerRepository.findByUserUserId(request.getUserId()).isPresent()) {
+        if (retailerRepository.findByUser_UserId(request.getUserId()).isPresent()) {
             throw new RuntimeException("User đã đăng ký retailer rồi");
         }
 
@@ -51,7 +51,7 @@ public class RetailerService {
     // ===== 2. Lấy info của chính mình =====
     public RetailerResponse getMyInfo(Long userId) {
 
-        Retailer retailer = retailerRepository.findByUserUserId(userId)
+        Retailer retailer = retailerRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
 
         RetailerResponse res = new RetailerResponse();
