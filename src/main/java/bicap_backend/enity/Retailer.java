@@ -53,15 +53,12 @@ public class Retailer {
     public String getBusinessLicense() {
         return businessLicense;
     }
-
     public void setBusinessLicense(String businessLicense) {
         this.businessLicense = businessLicense;
     }
-
     public String getAddress() {
         return address;
     }
-
     public void setAddress(String address) {
         this.address = address;
     }
