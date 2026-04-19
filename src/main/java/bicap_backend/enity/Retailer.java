@@ -25,7 +25,6 @@ public class Retailer {
 
     private String address;
 
-    // ===== Getter Setter =====
     public Long getRetailerId() {
         return retailerId;
     }
@@ -45,7 +44,6 @@ public class Retailer {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
