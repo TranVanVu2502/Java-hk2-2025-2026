@@ -1,6 +1,6 @@
 package bicap_backend.enity;
 // BICAP-31: Retailer entity
-//update fix backendretailer
+//update fix of backendretailer
 import bicap_backend.enity.User;
 import jakarta.persistence.*;
 
