@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductResponse {
     private Long productId;
+    private String imageUrl;
     private String name;
     private Double quantity;
     private Double price;

@@ -7,6 +7,14 @@ spring:
     username: 4M9GAyMW7W4qo4D.root
     password: ptbYvRuo2JSMdFYq
     driver-class-name: com.mysql.cj.jdbc.Driver
+    servlet:
+      multipart:
+        max-file-size: 5MB
+        max-request-size: 5MB
+
+      web:
+        resources:
+          static-locations: file:uploads/,classpath:/static/
 
   jpa:
     hibernate:

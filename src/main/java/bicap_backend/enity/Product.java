@@ -21,6 +21,9 @@ public class Product {
     @JoinColumn(name = "season_id", nullable = false)
     private FarmingSeason season;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Column(nullable = false, length = 150)
     private String name;
 

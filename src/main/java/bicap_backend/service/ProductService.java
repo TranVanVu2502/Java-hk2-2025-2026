@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +45,15 @@ public class ProductService {
                 .map(this::toResponse);
     }
 
+    @Transactional
+    public void updateImage(Long id, String filePath) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        product.setImageUrl(filePath);
+        productRepository.save(product);
+    }
+
     public ProductResponse getById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
@@ -56,6 +66,7 @@ public class ProductService {
                 .name(p.getName())
                 .quantity(p.getQuantity())
                 .price(p.getPrice())
+                .imageUrl(p.getImageUrl())
                 .status(p.getStatus())
                 .seasonId(p.getSeason().getSeasonId())
                 .seasonName(p.getSeason().getName())
