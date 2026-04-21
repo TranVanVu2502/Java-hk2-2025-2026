@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/farm")
+@RequestMapping("/api/farms")
 @RequiredArgsConstructor
 public class FarmController {
 
@@ -21,7 +21,7 @@ public class FarmController {
         return ResponseEntity.ok(farmService.create(request));
     }
 
-    @GetMapping("/my-farms")
+    @GetMapping("/my")
     public ResponseEntity<List<FarmResponse>> getMyFarms() {
         return ResponseEntity.ok(farmService.getMyFarms());
     }
