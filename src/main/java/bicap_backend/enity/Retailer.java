@@ -1,6 +1,5 @@
 package bicap_backend.enity;
 // BICAP-31: Retailer entity
-//update fix of retailer
 import jakarta.persistence.*;
 
 @Entity
@@ -22,32 +21,26 @@ public class Retailer {
 
     @Column(name = "business_license")
     private String businessLicense;
-
     private String address;
 
     public Long getRetailerId() {
         return retailerId;
     }
-
     public void setRetailerId(Long retailerId) {
         this.retailerId = retailerId;
     }
-
     public User getUser() {
         return user;
     }
-
     public void setUser(User user) {
         this.user = user;
     }
-
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
     }
-
     public String getBusinessLicense() {
         return businessLicense;
     }
