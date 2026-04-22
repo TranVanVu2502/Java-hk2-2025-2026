@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { FarmProvider } from './context/FarmContext';
+import { OrderProvider } from './context/OrderContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 
@@ -23,6 +24,10 @@ import FarmDashboard from './pages/farm/FarmDashboard';
 import FarmSeasons from './pages/farm/FarmSeasons';
 import FarmSeasonDetail from './pages/farm/FarmSeasonDetail';
 import FarmOrders from './pages/farm/FarmOrders';
+
+// Retailer
+import RetailerOrderNew from './pages/retailer/RetailerOrderNew';
+import RetailerDashboard from './pages/retailer/RetailerDashboard';
 
 /* ── Layout wrappers ── */
 function AdminLayout({ children }) {
@@ -46,48 +51,56 @@ function FarmLayout({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3500,
-            style: { borderRadius: '12px', fontFamily: "'Inter', sans-serif", fontSize: '14px' },
-          }}
-        />
-        <Routes>
-          {/* ── Auth ── */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+      <OrderProvider>
+        <BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3500,
+              style: { borderRadius: '12px', fontFamily: "'Inter', sans-serif", fontSize: '14px' },
+            }}
+          />
+          <Routes>
+            {/* ── Auth ── */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-          {/* ── Admin ── */}
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-          <Route path="/admin/farms" element={<AdminLayout><AdminFarms /></AdminLayout>} />
-          <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+            {/* ── Admin ── */}
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+            <Route path="/admin/farms" element={<AdminLayout><AdminFarms /></AdminLayout>} />
+            <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
 
-          {/* ── Farm Manager ── */}
-          <Route path="/farm" element={<Navigate to="/farm/dashboard" replace />} />
-          <Route path="/farm/dashboard" element={<FarmLayout><FarmDashboard /></FarmLayout>} />
-          <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
-          <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
-          <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
+            {/* ── Farm Manager ── */}
+            <Route path="/farm" element={<Navigate to="/farm/dashboard" replace />} />
+            <Route path="/farm/dashboard" element={<FarmLayout><FarmDashboard /></FarmLayout>} />
+            <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
+            <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
+            <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
 
-          {/* ── Product ── */}
-          <Route path="/" element={<Navigate to="/products" replace />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
+            {/* ── Product ── */}
+            <Route path="/" element={<Navigate to="/products" replace />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
 
-          {/* ── Fallback ── */}
-          <Route path="/unauthorized" element={
-            <div style={{ textAlign: 'center', padding: '80px', fontFamily: 'Inter, sans-serif' }}>
-              <h1 style={{ fontSize: 48 }}>🚫</h1>
-              <h2>Không có quyền truy cập</h2>
-              <a href="/" style={{ color: '#10b981' }}>Về trang chủ</a>
-            </div>
-          } />
-          <Route path="*" element={<Navigate to="/products" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* ── Retailer ── */}
+            <Route path="/retailer" element={<Navigate to="/retailer/orders" replace />} />
+            <Route path="/retailer/orders" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerDashboard /></ProtectedRoute>} />
+            <Route path="/order" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerOrderNew /></ProtectedRoute>} />
+            <Route path="/retailer/*" element={<Navigate to="/retailer/orders" replace />} />
+
+            {/* ── Fallback ── */}
+            <Route path="/unauthorized" element={
+              <div style={{ textAlign: 'center', padding: '80px', fontFamily: 'Inter, sans-serif' }}>
+                <h1 style={{ fontSize: 48 }}>🚫</h1>
+                <h2>Không có quyền truy cập</h2>
+                <a href="/" style={{ color: '#10b981' }}>Về trang chủ</a>
+              </div>
+            } />
+            <Route path="*" element={<Navigate to="/products" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </OrderProvider>
     </AuthProvider>
   );
 }

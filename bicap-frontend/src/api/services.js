@@ -55,3 +55,21 @@ export const qrService = {
   generate: (productId) => api.post(`/api/qr/generate/${productId}`),
   lookup: (code) => api.get(`/api/qr/${code}`),
 };
+
+// RETAILER
+export const retailerService = {
+  // POST /api/retailer — đăng ký retailer (body: { name, businessLicense, address })
+  create: (data) => api.post('/api/retailer', data),
+  // GET /api/retailer/me — lấy thông tin retailer hiện tại
+  getMyInfo: () => api.get('/api/retailer/me'),
+};
+
+// ORDER
+export const orderService = {
+  create: (data) => api.post('/api/orders', data),
+  getAll: () => api.get('/api/orders'),
+  getByFarm: () => api.get('/api/orders/farm'),
+  getById: (id) => api.get(`/api/orders/${id}`),
+  cancel: (id) => api.put(`/api/orders/${id}/cancel`),
+  confirm: (id) => api.put(`/api/orders/${id}/confirm`),
+};
