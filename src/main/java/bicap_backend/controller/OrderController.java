@@ -1,5 +1,5 @@
 package bicap_backend.controller;
-
+//fix
 import bicap_backend.dto.request.OrderRequest;
 import bicap_backend.dto.response.OrderResponse;
 import bicap_backend.service.OrderService;
@@ -23,6 +23,11 @@ public class OrderController {
     @GetMapping
     public List<OrderResponse> getAll() {
         return orderService.getOrdersByRetailer();
+    }
+
+    @GetMapping("/farm")
+    public List<OrderResponse> getByFarm() {
+        return orderService.getOrdersByFarm();
     }
 
     @GetMapping("/{id}")
