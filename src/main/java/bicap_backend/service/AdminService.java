@@ -9,6 +9,7 @@ import bicap_backend.enity.User;
 import bicap_backend.enums.FarmStatus;
 import bicap_backend.repository.IFarmRepository;
 import bicap_backend.repository.IUserRepository;
+import bicap_backend.repository.IOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +23,14 @@ public class AdminService {
 
     private final IFarmRepository farmRepository;
     private final IUserRepository userRepository;
+    private final IOrderRepository orderRepository;
 
     // ----- QUẢN LÝ DỮ LIỆU THỐNG KÊ ----- //
 
     public StatsResponse getDashboardStats() {
         long totalFarms = farmRepository.count();
         long totalUsers = userRepository.count();
-        // TODO: Khi tạo OrderRepository thì cập nhật ở đây
-        long totalOrders = 0;
+        long totalOrders = orderRepository.count();
 
         return StatsResponse.builder()
                 .totalFarms(totalFarms)
