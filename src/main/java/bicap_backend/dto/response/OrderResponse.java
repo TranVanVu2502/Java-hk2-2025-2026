@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -14,4 +15,7 @@ public class OrderResponse {
     private Long farmId;
     private String Status;
     private List<String> products;
+    private String farmName;
+    private LocalDateTime createdAt;
+    private List<OrderDetailResponse> orderDetails;
 }
