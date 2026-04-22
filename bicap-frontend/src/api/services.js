@@ -25,3 +25,12 @@ export const farmService = {
   update: (id, data) => api.put(`/api/farms/${id}`, data),
   delete: (id) => api.delete(`/api/farms/${id}`),
 };
+
+// SEASON
+export const seasonService = {
+  create: (farmId, data) => api.post(`/api/farms/${farmId}/seasons`, data),
+  getByFarm: (farmId) => api.get(`/api/farms/${farmId}/seasons`),
+  getById: (id) => api.get(`/api/seasons/${id}`),
+  update: (id, data) => api.put(`/api/seasons/${id}`, data),
+  export: (id) => api.post(`/api/seasons/${id}/export`),
+};

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { FarmProvider } from './context/FarmContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 
@@ -18,11 +19,27 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminFarms from './pages/admin/AdminFarms';
 import AdminUsers from './pages/admin/AdminUsers';
 
+// Farm Manager
+import FarmDashboard from './pages/farm/FarmDashboard';
+import FarmSeasons from './pages/farm/FarmSeasons';
+import FarmSeasonDetail from './pages/farm/FarmSeasonDetail';
+import FarmOrders from './pages/farm/FarmOrders';
+
 /* ── Layout wrappers ── */
 function AdminLayout({ children }) {
   return (
     <ProtectedRoute allowedRoles={['ADMIN']}>
       <DashboardLayout>{children}</DashboardLayout>
+    </ProtectedRoute>
+  );
+}
+
+function FarmLayout({ children }) {
+  return (
+    <ProtectedRoute allowedRoles={['FARM_MANAGER']}>
+      <FarmProvider>
+        <DashboardLayout>{children}</DashboardLayout>
+      </FarmProvider>
     </ProtectedRoute>
   );
 }
@@ -43,12 +60,18 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-
           {/* ── Admin ── */}
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
           <Route path="/admin/farms" element={<AdminLayout><AdminFarms /></AdminLayout>} />
           <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+
+          {/* ── Farm Manager ── */}
+          <Route path="/farm" element={<Navigate to="/farm/dashboard" replace />} />
+          <Route path="/farm/dashboard" element={<FarmLayout><FarmDashboard /></FarmLayout>} />
+          <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
+          <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
+          <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
 
           {/* ── Fallback ── */}
           <Route path="/unauthorized" element={
