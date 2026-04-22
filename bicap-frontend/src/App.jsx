@@ -9,10 +9,9 @@ import DashboardLayout from './components/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
-// Guest (public)
-import ProductsPage from './pages/guest/ProductsPage';
-import ProductDetailPage from './pages/guest/ProductDetailPage';
-import QRLookupPage from './pages/guest/QRLookupPage';
+// Product
+import ProductsPage from './pages/product/ProductsPage';
+import ProductDetailPage from './pages/product/ProductDetailPage';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -72,6 +71,11 @@ export default function App() {
           <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
           <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
           <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
+
+          {/* ── Product ── */}
+          <Route path="/" element={<Navigate to="/products" replace />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
 
           {/* ── Fallback ── */}
           <Route path="/unauthorized" element={

@@ -34,3 +34,24 @@ export const seasonService = {
   update: (id, data) => api.put(`/api/seasons/${id}`, data),
   export: (id) => api.post(`/api/seasons/${id}/export`),
 };
+
+// PRODUCT
+export const productService = {
+  create: (data) => api.post('/api/products', data),
+  getAll: (name, page = 0, size = 10) =>
+    api.get('/api/products', { params: { name, page, size } }),
+  getById: (id) => api.get(`/api/products/${id}`),
+  uploadImage: (id, file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post(`/api/products/${id}/upload-image`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
+// QR
+export const qrService = {
+  generate: (productId) => api.post(`/api/qr/generate/${productId}`),
+  lookup: (code) => api.get(`/api/qr/${code}`),
+};
