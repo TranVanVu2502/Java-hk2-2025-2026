@@ -10,5 +10,5 @@ import lombok.Setter;
 public class OrderDetailRequest {
     private Double price;
     private Long productId;
-    private Integer quantity;
+    private Double quantity;
 }
