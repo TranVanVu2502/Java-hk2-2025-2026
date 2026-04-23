@@ -27,8 +27,9 @@ public class QRService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
-        if (qrCodeRepository.findByProduct_ProductId(productId).isPresent()) {
-            throw new RuntimeException("Sản phẩm này đã có QR Code");
+        var existingQR = qrCodeRepository.findByProduct_ProductId(productId);
+        if (existingQR.isPresent()) {
+            return toResponse(existingQR.get());
         }
 
 //      Tạo mã QR riêng biệt
