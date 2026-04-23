@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import PublicHeader from '../../components/PublicHeader';
 import { productService, qrService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { useOrder } from '../../context/OrderContext';
@@ -70,20 +71,7 @@ export default function ProductDetailPage() {
 
     return (
         <div className="public-page">
-            <header className="public-header">
-                <div className="container">
-                    <div className="public-header-inner">
-                        <Link to="/" className="auth-logo" style={{ textDecoration: 'none' }}>
-                            <div className="logo-icon logo-sm"><Leaf size={18} /></div>
-                            <span className="logo-text">BICAP</span>
-                        </Link>
-                        <nav className="guest-nav">
-                            <Link to="/products" className="guest-nav-link active">Sản phẩm</Link>
-                            <Link to="/qr" className="guest-nav-link">Tra cứu QR</Link>
-                        </nav>
-                    </div>
-                </div>
-            </header>
+            <PublicHeader />
 
             <div className="container" style={{ padding: '32px 24px 80px' }}>
 

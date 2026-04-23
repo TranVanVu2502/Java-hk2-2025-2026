@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import PublicHeader from '../../components/PublicHeader';
 import { qrService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { Leaf, QrCode, Search, CheckCircle, XCircle, Hash, MapPin, Calendar, Package, LogOut } from 'lucide-react';
@@ -52,31 +53,7 @@ export default function QRLookupPage() {
 
   return (
     <div className="public-page">
-      <header className="public-header">
-        <div className="container">
-          <div className="public-header-inner">
-            <Link to="/" className="auth-logo" style={{ textDecoration: 'none' }}>
-              <div className="logo-icon logo-sm"><Leaf size={18} /></div>
-              <span className="logo-text">BICAP</span>
-            </Link>
-            <nav className="guest-nav">
-              <Link to="/products" className="guest-nav-link">Sản phẩm</Link>
-              <Link to="/qr" className="guest-nav-link active">Tra cứu QR</Link>
-              {isRetailer ? (
-                <div className="header-actions-group">
-                  <Link to="/order" className="header-action-btn">Giỏ hàng</Link>
-                  <Link to="/retailer/orders" className="header-action-btn">Xem lịch sử đơn hàng</Link>
-                  <button onClick={handleLogout} className="header-action-btn">
-                    <LogOut size={16} /> Đăng xuất
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="btn-outline-sm">Đăng nhập</Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero */}
       <section className="qr-hero">

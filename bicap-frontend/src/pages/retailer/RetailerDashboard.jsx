@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PublicHeader from '../../components/PublicHeader';
 import { orderService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -52,38 +53,14 @@ export default function RetailerDashboard() {
 
   return (
     <div className="public-page">
-      <header className="public-header">
-        <div className="container">
-          <div className="public-header-inner">
-            <Link to="/" className="auth-logo" style={{ textDecoration: 'none' }}>
-              <div className="logo-icon logo-sm"><Leaf size={18} /></div>
-              <span className="logo-text">BICAP</span>
-            </Link>
-            <nav className="guest-nav">
-              <Link to="/products" className="guest-nav-link">Sản phẩm</Link>
-              <Link to="/qr" className="guest-nav-link">Tra cứu QR</Link>
-              {isRetailer ? (
-                <div className="header-actions-group">
-                  <Link to="/order" className="header-action-btn">Giỏ hàng</Link>
-                  <Link to="/retailer/orders" className="header-action-btn active">Xem lịch sử đơn hàng</Link>
-                  <button onClick={handleLogout} className="header-action-btn">
-                    <LogOut size={16} /> Đăng xuất
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="btn-outline-sm">Đăng nhập</Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <div className="container public-page-content">
         <div className="page">
           <div className="page-header">
             <div>
-                <h1 className="page-title">Lịch sử đơn hàng</h1>
-                <p className="page-subtitle"><ShoppingCart size={16} /> {orders.length} đơn hàng</p>
+              <h1 className="page-title">Lịch sử đơn hàng</h1>
+              <p className="page-subtitle"><ShoppingCart size={16} /> {orders.length} đơn hàng</p>
             </div>
           </div>
 
@@ -129,6 +106,7 @@ export default function RetailerDashboard() {
                     <th>Ngày tạo</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
+                    <th>Chi tiết</th>
                   </tr>
                 </thead>
                 <tbody>

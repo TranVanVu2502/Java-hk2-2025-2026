@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PublicHeader from '../../components/PublicHeader';
 import { orderService } from '../../api/services';
 import { useOrder } from '../../context/OrderContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,7 +12,7 @@ export default function RetailerOrderNew() {
   const { user, logout } = useAuth();
   const { cartItems, updateQuantity, removeFromCart, clearCart } = useOrder();
   const [loading, setLoading] = useState(false);
-  
+
   const isRetailer = user?.role === 'RETAILER';
 
   const handleLogout = () => {
@@ -58,31 +59,7 @@ export default function RetailerOrderNew() {
   return (
     <div className="public-page">
       {/* --- HEADER ĐỒNG BỘ HOÀN TOÀN --- */}
-      <header className="public-header">
-        <div className="container">
-          <div className="public-header-inner">
-            <Link to="/" className="auth-logo" style={{ textDecoration: 'none' }}>
-              <div className="logo-icon logo-sm"><Leaf size={18} /></div>
-              <span className="logo-text">BICAP</span>
-            </Link>
-            <nav className="guest-nav">
-              <Link to="/products" className="guest-nav-link">Sản phẩm</Link>
-              <Link to="/qr" className="guest-nav-link">Tra cứu QR</Link>
-              {isRetailer ? (
-                <div className="header-actions-group">
-                  <Link to="/order" className="header-action-btn active">Giỏ hàng</Link>
-                  <Link to="/retailer/orders" className="header-action-btn">Lịch sử đơn</Link>
-                  <button onClick={handleLogout} className="header-action-btn">
-                    <LogOut size={16} /> Đăng xuất
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="btn-outline-sm">Đăng nhập</Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* --- NỘI DUNG CHÍNH --- */}
       <main style={{ padding: '40px 0 80px' }}>
@@ -123,20 +100,20 @@ export default function RetailerOrderNew() {
                           </div>
                           <div className="form-group">
                             <label>Số lượng (kg)</label>
-                            <input 
-                              id={`order-qty-${i}`} 
-                              type="number" 
-                              min="0.1" 
+                            <input
+                              id={`order-qty-${i}`}
+                              type="number"
+                              min="0.1"
                               step="0.1"
                               max={maxQty}
                               value={item.quantity}
                               onChange={(e) => updateQuantity(item.cartId, Number(e.target.value || 0))}
                               /* Ép CSS trực tiếp vào tag để ẩn mũi tên spinner */
-                              style={{ 
-                                WebkitAppearance: 'none', 
+                              style={{
+                                WebkitAppearance: 'none',
                                 MozAppearance: 'textfield',
-                                margin: 0 
-                              }} 
+                                margin: 0
+                              }}
                             />
                           </div>
                         </div>
