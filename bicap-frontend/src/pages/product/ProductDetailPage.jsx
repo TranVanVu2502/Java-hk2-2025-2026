@@ -11,7 +11,7 @@ export default function ProductDetailPage() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const { addToCart } = useOrder();
-t  const [product, setProduct] = useState(null);
+    const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [qrLoading, setQrLoading] = useState(false);
     const [qrData, setQrData] = useState(null);
