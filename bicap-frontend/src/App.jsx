@@ -10,9 +10,10 @@ import DashboardLayout from './components/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 
-// Product
+// Product & QR
 import ProductsPage from './pages/product/ProductsPage';
 import ProductDetailPage from './pages/product/ProductDetailPage';
+import QRLookupPage from './pages/qr/QRLookupPage';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -80,10 +81,12 @@ export default function App() {
             <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
             <Route path="/farm/orders/:id" element={<FarmLayout><FarmOrderDetail /></FarmLayout>} />
 
-            {/* ── Product ── */}
+            {/* ── Product & QR ── */}
             <Route path="/" element={<Navigate to="/products" replace />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/qr" element={<QRLookupPage />} />
+            <Route path="/qr/:code" element={<QRLookupPage />} />
 
             {/* ── Retailer ── */}
             <Route path="/retailer" element={<Navigate to="/retailer/orders" replace />} />

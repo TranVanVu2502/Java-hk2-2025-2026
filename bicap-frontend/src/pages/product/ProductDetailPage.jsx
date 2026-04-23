@@ -111,18 +111,8 @@ export default function ProductDetailPage() {
                                 <span style={{ fontSize: '80px' }}>🌿</span>
                             )}
                         </div>
-                        <span className={`badge ${meta.badge}`} style={{ fontSize: '14px', padding: '6px 16px' }}>{meta.label}</span>
-                        {product.qrCode && (
-                            <button
-                                id="view-qr-btn"
-                                className="btn-primary"
-                                style={{ width: '100%', marginTop: '16px' }}
-                                onClick={handleViewQR}
-                                disabled={qrLoading}
-                            >
-                                {qrLoading ? <span className="spinner white"></span> : <><QrCode size={18} /> Xem nguồn gốc QR</>}
-                            </button>
-                        )}
+
+
                         {product.status === 'AVAILABLE' ? (
                             <button
                                 onClick={handleAddToCart}
@@ -216,6 +206,32 @@ export default function ProductDetailPage() {
                                                 <span className="info-label">Địa chỉ</span>
                                                 <span className="info-value">{product.farmAddress}</span>
                                             </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {(product.qrCode || product.blockchainHash) && (
+                                <div className="detail-info-block">
+                                    <h3><QrCode size={15} /> Truy xuất nguồn gốc</h3>
+                                    <div className="info-list">
+                                        {product.qrCode && (
+                                            <>
+                                                <div className="info-item">
+                                                    <span className="info-label">Mã QR</span>
+                                                    <div className="info-value">
+                                                        <img
+                                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(window.location.origin + '/qr/' + product.qrCode)}`}
+                                                            alt="QR Code"
+                                                            style={{ width: 120, height: 120, borderRadius: 8, border: '1px solid #e5e7eb', padding: 4, background: '#fff' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="info-item">
+                                                    <span className="info-label">Mã truy xuất</span>
+                                                    <span className="info-value">{product.qrCode}</span>
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 </div>
