@@ -15,4 +15,5 @@ public class OrderDetailResponse {
     private String productName;
     private Double quantity;
     private Double price;
+    private String productImage;
 }

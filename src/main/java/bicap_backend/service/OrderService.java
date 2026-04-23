@@ -151,6 +151,7 @@ public class OrderService {
                         .productName(od.getProduct() != null ? od.getProduct().getName() : null)
                         .quantity(od.getQuantity())
                         .price(od.getPrice())
+                        .productImage(od.getProduct() != null ? od.getProduct().getImageUrl() : null)
                         .build());
             }
         }
@@ -159,6 +160,9 @@ public class OrderService {
                 .orderId(order.getOrderId())
                 .status(order.getStatus())
                 .retailerId(order.getRetailer() != null ? order.getRetailer().getRetailerId() : null)
+                .retailerName(order.getRetailer() != null ? order.getRetailer().getName() : null)
+                .retailerAddress(order.getRetailer() != null ? order.getRetailer().getAddress() : null)
+                .retailerBusinessLicense(order.getRetailer() != null ? order.getRetailer().getBusinessLicense() : null)
                 .farmId(order.getFarm() != null ? order.getFarm().getFarmId() : null)
                 .farmName(order.getFarm() != null ? order.getFarm().getName() : null)
                 .createdAt(order.getCreatedAt())
