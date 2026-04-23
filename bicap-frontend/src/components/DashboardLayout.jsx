@@ -14,16 +14,25 @@ const NAV = {
     { path: '/admin/farms', label: 'Duyệt Farm', icon: Building2 },
     { path: '/admin/users', label: 'Quản lý User', icon: Users },
   ],
+  FARM_MANAGER: [
+    { path: '/farm/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/farm/seasons', label: 'Mùa vụ', icon: BarChart3 },
+    { path: '/farm/orders', label: 'Đơn hàng', icon: ShoppingCart },
+  ],
 };
 
 const ROLE_LABELS = {
   ADMIN: { name: 'Quản trị viên', color: '#e0e7ff', text: '#4338ca' },
+  FARM_MANAGER: { name: 'Chủ trang trại', color: '#d1fae5', text: '#047857' },
 };
 
 const PAGE_TITLES = {
   '/admin/dashboard': 'Dashboard',
   '/admin/farms': 'Duyệt Farm',
   '/admin/users': 'Quản lý User',
+  '/farm/dashboard': 'Dashboard trang trại',
+  '/farm/seasons': 'Mùa vụ',
+  '/farm/orders': 'Đơn hàng Farm',
 };
 
 /* ── Avatar initials ── */

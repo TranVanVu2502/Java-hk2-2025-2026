@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { orderService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
 import { ShoppingCart, Check, X, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
-  PENDING:   { badge: 'badge-orange', label: 'Chờ xác nhận' },
-  CONFIRMED: { badge: 'badge-blue',   label: 'Đã xác nhận' },
-  REJECTED:  { badge: 'badge-red',    label: 'Từ chối' },
-  COMPLETED: { badge: 'badge-green',  label: 'Hoàn thành' },
-  CANCELLED: { badge: 'badge-gray',   label: 'Đã hủy' },
+  PENDING: { badge: 'badge-orange', label: 'Chờ xác nhận' },
+  CONFIRMED: { badge: 'badge-blue', label: 'Đã xác nhận' },
+  REJECTED: { badge: 'badge-red', label: 'Từ chối' },
+  COMPLETED: { badge: 'badge-green', label: 'Hoàn thành' },
+  CANCELLED: { badge: 'badge-gray', label: 'Đã hủy' },
 };
 
 export default function FarmOrders() {
@@ -32,7 +33,7 @@ export default function FarmOrders() {
   const handleConfirm = async (id) => {
     const order = orders.find(o => o.orderId === id);
     console.log('🔍 Xác nhận đơn #' + id, 'Trạng thái hiện tại:', order?.status);
-    
+
     try {
       await orderService.confirm(id);
       toast.success('Đã xác nhận đơn hàng');
@@ -46,10 +47,10 @@ export default function FarmOrders() {
 
   const handleCancel = async (id) => {
     if (!confirm('Từ chối đơn hàng này?')) return;
-    
+
     const order = orders.find(o => o.orderId === id);
     console.log('🔍 Từ chối đơn #' + id, 'Trạng thái hiện tại:', order?.status);
-    
+
     try {
       await orderService.cancel(id);
       toast.success('Đã từ chối đơn hàng');
@@ -105,6 +106,7 @@ export default function FarmOrders() {
                 <th>Ngày đặt</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
+                <th>Chi tiết</th>
               </tr>
             </thead>
             <tbody>
@@ -133,6 +135,16 @@ export default function FarmOrders() {
                         </div>
                       )}
                       {order.status !== 'PENDING' && <span className="td-muted">—</span>}
+                    </td>
+                    <td>
+                      <Link
+                        id={`order-detail-${order.orderId}`}
+                        to={`/farm/orders/${order.orderId}`}
+                        className="btn-primary-sm"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        Chi tiết
+                      </Link>
                     </td>
                   </tr>
                 );

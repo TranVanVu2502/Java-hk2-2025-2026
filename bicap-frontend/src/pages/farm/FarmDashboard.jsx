@@ -6,9 +6,9 @@ import { Building2, Plus, CheckCircle, Clock, XCircle, Edit, ChevronRight, Leaf 
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
-  PENDING:  { icon: Clock,         color: '#f59e0b', bg: '#fffbeb', badge: 'badge-orange', label: 'Chờ Admin duyệt' },
-  APPROVED: { icon: CheckCircle,   color: '#10b981', bg: '#ecfdf5', badge: 'badge-green',  label: 'Đã được duyệt' },
-  REJECTED: { icon: XCircle,       color: '#ef4444', bg: '#fef2f2', badge: 'badge-red',    label: 'Bị từ chối' },
+  PENDING: { icon: Clock, color: '#f59e0b', bg: '#fffbeb', badge: 'badge-orange', label: 'Chờ Admin duyệt' },
+  APPROVED: { icon: CheckCircle, color: '#10b981', bg: '#ecfdf5', badge: 'badge-green', label: 'Đã được duyệt' },
+  REJECTED: { icon: XCircle, color: '#ef4444', bg: '#fef2f2', badge: 'badge-red', label: 'Bị từ chối' },
 };
 
 export default function FarmDashboard() {
@@ -124,25 +124,6 @@ export default function FarmDashboard() {
               ))}
             </div>
           </div>
-
-          {/* Quick links */}
-          {myFarm.status === 'APPROVED' && (
-            <div className="quick-links-grid">
-              {[
-                { label: 'Quản lý mùa vụ', desc: 'Tạo và theo dõi các mùa vụ canh tác', icon: '📅', to: '/farm/seasons' },
-                { label: 'Đơn hàng', desc: 'Xem và xử lý đơn hàng từ nhà bán lẻ', icon: '📦', to: '/farm/orders' },
-              ].map(link => (
-                <Link key={link.label} to={link.to} className="quick-link-card" style={{ textDecoration: 'none' }}>
-                  <span className="quick-link-icon">{link.icon}</span>
-                  <div>
-                    <strong>{link.label}</strong>
-                    <p>{link.desc}</p>
-                  </div>
-                  <ChevronRight size={18} style={{ marginLeft: 'auto', color: '#9ca3af' }} />
-                </Link>
-              ))}
-            </div>
-          )}
         </>
       )}
     </div>

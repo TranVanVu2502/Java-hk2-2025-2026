@@ -24,6 +24,7 @@ import FarmDashboard from './pages/farm/FarmDashboard';
 import FarmSeasons from './pages/farm/FarmSeasons';
 import FarmSeasonDetail from './pages/farm/FarmSeasonDetail';
 import FarmOrders from './pages/farm/FarmOrders';
+import FarmOrderDetail from './pages/farm/FarmOrderDetail';
 
 // Retailer
 import RetailerOrderNew from './pages/retailer/RetailerOrderNew';
@@ -77,6 +78,7 @@ export default function App() {
             <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
             <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
             <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
+            <Route path="/farm/orders/:id" element={<FarmLayout><FarmOrderDetail /></FarmLayout>} />
 
             {/* ── Product ── */}
             <Route path="/" element={<Navigate to="/products" replace />} />
