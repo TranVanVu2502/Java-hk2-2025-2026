@@ -2,34 +2,63 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productService, qrService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
-import { Leaf, Package, MapPin, Calendar, CheckCircle, Phone } from 'lucide-react';
+import { useOrder } from '../../context/OrderContext';
+import { Leaf, ArrowLeft, QrCode, Package, MapPin, Calendar, CheckCircle, ShoppingCart, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
-
-    const [product, setProduct] = useState(null);
+    const { user, logout } = useAuth();
+    const { addToCart } = useOrder();
+t  const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [qrLoading, setQrLoading] = useState(false);
+    const [qrData, setQrData] = useState(null);
 
     useEffect(() => {
         productService.getById(id)
             .then(res => setProduct(res.data))
-            .catch(() => {
-                toast.error('Không tìm thấy sản phẩm');
-                navigate('/products');
-            })
+            .catch(() => navigate('/products'))
             .finally(() => setLoading(false));
-    }, [id, navigate]);
+    }, [id]);
 
-    if (loading) return (
-        <div className="page-loading" style={{ minHeight: '100vh' }}>
-            <div className="loading-spinner-lg"></div>
-        </div>
-    );
+    const handleViewQR = async () => {
+        if (!product?.qrCode) return;
+        setQrLoading(true);
+        try {
+            const res = await qrService.lookup(product.qrCode);
+            setQrData(res.data);
+        } catch {
+            alert('Không tìm thấy thông tin QR');
+        } finally {
+            setQrLoading(false);
+        }
+    };
 
+    const handleLogout = () => {
+        logout();
+        navigate('/products');
+    };
+
+    const handleAddToCart = () => {
+        if (!product || product.status !== 'AVAILABLE') return;
+        addToCart(
+            {
+                productId: product.productId,
+                farmId: product.farmId,
+                farmName: product.farmName,
+                name: product.name,
+                price: product.price ? Number(product.price) : 0,
+                maxQuantity: Number(product.quantity) || 0,
+            },
+            1
+        );
+        toast.success('Đã thêm sản phẩm vào giỏ hàng');
+        navigate('/order');
+    };
+
+    if (loading) return <div className="page-loading" style={{ minHeight: '100vh' }}><div className="loading-spinner-lg"></div></div>;
     if (!product) return null;
 
     const statusMap = {
@@ -57,14 +86,20 @@ export default function ProductDetailPage() {
             </header>
 
             <div className="container" style={{ padding: '32px 24px 80px' }}>
+
                 <div className="product-detail-grid">
-                    {/* Cột trái: Hình ảnh & Hành động chính */}
+                    {/* Left: Image / Visual */}
                     <div className="product-detail-visual">
                         <div className="product-detail-emoji" style={{
-                            width: '100%', height: '300px', backgroundColor: '#f9fafb',
-                            borderRadius: '12px', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', overflow: 'hidden', marginBottom: '16px',
-                            border: '1px solid #f1f5f9'
+                            width: '100%',
+                            height: '300px',
+                            backgroundColor: '#f9fafb',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            marginBottom: '16px',
                         }}>
                             {product.imageUrl ? (
                                 <img
@@ -76,39 +111,49 @@ export default function ProductDetailPage() {
                                 <span style={{ fontSize: '80px' }}>🌿</span>
                             )}
                         </div>
-
-                        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                            <span className={`badge ${meta.badge}`} style={{ fontSize: '14px', padding: '6px 16px' }}>
-                                {meta.label}
-                            </span>
-                        </div>
-
+                        <span className={`badge ${meta.badge}`} style={{ fontSize: '14px', padding: '6px 16px' }}>{meta.label}</span>
                         {product.qrCode && (
                             <button
+                                id="view-qr-btn"
                                 className="btn-primary"
-                                style={{ width: '100%', marginBottom: '10px' }}
+                                style={{ width: '100%', marginTop: '16px' }}
                                 onClick={handleViewQR}
                                 disabled={qrLoading}
                             >
-                                {qrLoading ? <span className="spinner white"></span> : <><QrCode size={18} /> Truy xuất nguồn gốc</>}
+                                {qrLoading ? <span className="spinner white"></span> : <><QrCode size={18} /> Xem nguồn gốc QR</>}
                             </button>
                         )}
-
-                        <button
-                            style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                gap: 8, width: '100%', padding: '13px 24px',
-                                background: '#f3f4f6', borderRadius: '10px',
-                                color: '#374151', fontWeight: 600, fontSize: 14, border: '1px solid #d1d5db',
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => toast('Tính năng đặt hàng đang được phát triển', { icon: '🚧' })}
-                        >
-                            <Phone size={18} /> Liên hệ hỗ trợ
-                        </button>
+                        {product.status === 'AVAILABLE' ? (
+                            <button
+                                onClick={handleAddToCart}
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    gap: 8, width: '100%', marginTop: '10px',
+                                    padding: '13px 24px', background: '#10b981', borderRadius: '10px',
+                                    color: 'white', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer'
+                                }}
+                            >
+                                <ShoppingCart size={18} /> Đặt hàng
+                            </button>
+                        ) : (
+                            <button
+                                onClick={navigate('/login')}
+                                disabled={product.status !== 'AVAILABLE'}
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    gap: 8, width: '100%', marginTop: '10px',
+                                    padding: '13px 24px',
+                                    background: isRetailer ? '#d1d5db' : '#10b981',
+                                    borderRadius: '10px',
+                                    color: 'white', fontWeight: 600, fontSize: 14, border: 'none', 'not-allowed': 'pointer'
+                                }}
+                            >
+                                <ShoppingCart size={18} />
+                            </button>
+                        )}
                     </div>
 
-                    {/* Cột phải: Thông tin chi tiết */}
+                    {/* Right: Info */}
                     <div className="product-detail-info">
                         <h1 className="product-detail-name">{product.name}</h1>
                         <div className="product-detail-price">
@@ -120,34 +165,50 @@ export default function ProductDetailPage() {
                                 <h3><Package size={15} /> Thông tin sản phẩm</h3>
                                 <div className="info-list">
                                     <div className="info-item">
-                                        <span className="info-label">Sản lượng còn</span>
+                                        <span className="info-label">Số lượng</span>
                                         <span className="info-value">{product.quantity} kg</span>
                                     </div>
                                     <div className="info-item">
-                                        <span className="info-label">Mã số lô</span>
+                                        <span className="info-label">Mã sản phẩm</span>
                                         <span className="info-value">#{product.productId}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <span className="info-label">Trạng thái</span>
+                                        <span className={`badge ${meta.badge}`}>{meta.label}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {product.seasonName && (
                                 <div className="detail-info-block">
-                                    <h3><Calendar size={15} /> Chu kỳ mùa vụ</h3>
+                                    <h3><Calendar size={15} /> Mùa vụ</h3>
                                     <div className="info-list">
                                         <div className="info-item">
-                                            <span className="info-label">Mùa vụ</span>
+                                            <span className="info-label">Tên mùa vụ</span>
                                             <span className="info-value">{product.seasonName}</span>
                                         </div>
+                                        {product.seasonStart && (
+                                            <div className="info-item">
+                                                <span className="info-label">Bắt đầu</span>
+                                                <span className="info-value">{product.seasonStart}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
 
                             {product.farmName && (
                                 <div className="detail-info-block">
-                                    <h3><MapPin size={15} /> Nơi sản xuất</h3>
+                                    <h3><MapPin size={15} /> Trang trại</h3>
                                     <div className="info-list">
+                                        {product.farmId && (
+                                            <div className="info-item">
+                                                <span className="info-label">Mã trang trại</span>
+                                                <span className="info-value">#{product.farmId}</span>
+                                            </div>
+                                        )}
                                         <div className="info-item">
-                                            <span className="info-label">Trang trại</span>
+                                            <span className="info-label">Tên trang trại</span>
                                             <span className="info-value">{product.farmName}</span>
                                         </div>
                                         {product.farmAddress && (
@@ -162,11 +223,33 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* QR Result */}
+                {qrData && (
+                    <div className="qr-result-card" style={{ marginTop: '32px' }}>
+                        <div className="result-header">
+                            <div className="result-verified"><CheckCircle size={20} /><span>Đã xác thực nguồn gốc</span></div>
+                        </div>
+                        <div className="result-grid">
+                            {[
+                                { label: 'Trang trại', value: qrData.farmName },
+                                { label: 'Địa chỉ', value: qrData.farmAddress },
+                                { label: 'Mùa vụ', value: qrData.seasonName },
+                                { label: 'Blockchain Hash', value: qrData.blockchainHash },
+                            ].filter(r => r.value).map(r => (
+                                <div className="result-section-block" key={r.label}>
+                                    <h3>{r.label}</h3>
+                                    <p className={r.label === 'Blockchain Hash' ? 'blockchain-hash' : 'info-value'}>{r.value}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <footer className="public-footer">
                 <div className="container">
-                    <p>© 2025 BICAP — Hệ thống quản lý nông sản sạch Blockchain</p>
+                    <p>© 2025 BICAP — Blockchain Integration in Clean Agricultural Production</p>
                 </div>
             </footer>
         </div>

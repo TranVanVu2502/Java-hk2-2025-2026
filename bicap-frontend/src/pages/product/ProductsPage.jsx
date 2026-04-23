@@ -22,6 +22,7 @@ export default function ProductsPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const isRetailer = user?.role === 'RETAILER';
 
   const handleLogout = () => {
     logout();
@@ -61,6 +62,17 @@ export default function ProductsPage() {
             <nav className="guest-nav">
               <Link to="/products" className="guest-nav-link active">Sản phẩm</Link>
               <Link to="/qr" className="guest-nav-link">Tra cứu QR</Link>
+              {isRetailer ? (
+                <div className="header-actions-group">
+                  <Link to="/order" className="header-action-btn">Giỏ hàng</Link>
+                  <Link to="/retailer/orders" className="header-action-btn">Xem lịch sử đơn hàng</Link>
+                  <button onClick={handleLogout} className="header-action-btn">
+                    <LogOut size={16} /> Đăng xuất
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="btn-outline-sm">Đăng nhập</Link>
+              )}
             </nav>
           </div>
         </div>
