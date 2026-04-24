@@ -16,6 +16,9 @@ public class OrderResponse {
     private String Status;
     private List<String> products;
     private String farmName;
+    private String retailerName;
+    private String retailerAddress;
+    private String retailerBusinessLicense;
     private LocalDateTime createdAt;
     private List<OrderDetailResponse> orderDetails;
 }
