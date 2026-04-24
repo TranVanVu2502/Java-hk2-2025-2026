@@ -111,7 +111,7 @@ export default function RetailerDashboard() {
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
-                    <tr><td colSpan={6} className="empty-row">Không có đơn hàng nào</td></tr>
+                    <tr><td colSpan={7} className="empty-row">Không có đơn hàng nào</td></tr>
                   ) : filtered.map((order, i) => {
                     const meta = ORDER_STATUS[order.status] || ORDER_STATUS.PENDING;
                     return (
@@ -139,6 +139,16 @@ export default function RetailerDashboard() {
                               <span className="td-muted">—</span>
                             )}
                           </div>
+                        </td>
+                        <td>
+                          <Link
+                            id={`order-detail-${order.orderId}`}
+                            to={`/retailer/orders/${order.orderId}`}
+                            className="btn-primary-sm"
+                            style={{ textDecoration: 'none' }}
+                          >
+                            Chi tiết
+                          </Link>
                         </td>
                       </tr>
                     );
