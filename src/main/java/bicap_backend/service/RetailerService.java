@@ -65,4 +65,29 @@ public class RetailerService {
                 .address(retailer.getAddress())
                 .build();
     }
+
+    public RetailerResponse updateMyInfo(RetailerRequest request) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Retailer retailer = retailerRepository.findByUserUserId(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+
+        retailer.setName(request.getName());
+        retailer.setBusinessLicense(request.getBusinessLicense());
+        retailer.setAddress(request.getAddress());
+
+        Retailer saved = retailerRepository.save(retailer);
+
+        return RetailerResponse.builder()
+                .retailerId(saved.getRetailerId())
+                .name(saved.getName())
+                .businessLicense(saved.getBusinessLicense())
+                .address(saved.getAddress())
+                .build();
+    }
 }
