@@ -23,7 +23,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 // Farm Manager
 import FarmDashboard from './pages/farm/FarmDashboard';
 import FarmSeasons from './pages/farm/FarmSeasons';
-import FarmSeasonDetail from './pages/farm/FarmSeasonDetail';
+import FarmSeasonForm from './pages/farm/FarmSeasonForm';
 import FarmOrders from './pages/farm/FarmOrders';
 import FarmOrderDetail from './pages/farm/FarmOrderDetail';
 
@@ -79,8 +79,8 @@ export default function App() {
             <Route path="/farm" element={<Navigate to="/farm/dashboard" replace />} />
             <Route path="/farm/dashboard" element={<FarmLayout><FarmDashboard /></FarmLayout>} />
             <Route path="/farm/seasons" element={<FarmLayout><FarmSeasons /></FarmLayout>} />
-            <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonDetail /></FarmLayout>} />
-            <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
+            <Route path="/farm/seasons/new" element={<FarmLayout><FarmSeasonForm /></FarmLayout>} />
+            <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonForm /></FarmLayout>} />            <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
             <Route path="/farm/orders/:id" element={<FarmLayout><FarmOrderDetail /></FarmLayout>} />
 
             {/* ── Product & QR ── */}

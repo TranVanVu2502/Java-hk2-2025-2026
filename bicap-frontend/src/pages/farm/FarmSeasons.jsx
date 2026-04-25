@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { seasonService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { Plus, Calendar, RefreshCw, X } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Edit2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_TABS = [
@@ -20,12 +20,10 @@ const STATUS_META = {
 
 export default function FarmSeasons() {
   const { myFarm } = useFarm();
+  const navigate = useNavigate();
   const [seasons, setSeasons] = useState([]);
   const [tab, setTab] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', description: '' });
-  const [saving, setSaving] = useState(false);
 
   const load = () => {
     if (!myFarm?.farmId) return;
@@ -37,19 +35,6 @@ export default function FarmSeasons() {
   };
 
   useEffect(() => { load(); }, [myFarm]);
-
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await seasonService.create(myFarm.farmId, form);
-      toast.success('Đã tạo mùa vụ mới');
-      setShowForm(false);
-      setForm({ name: '', startDate: '', endDate: '', description: '' });
-      load();
-    } catch { toast.error('Tạo mùa vụ thất bại'); }
-    finally { setSaving(false); }
-  };
 
   const filtered = tab ? seasons.filter(s => s.status === tab) : seasons;
 
@@ -71,49 +56,11 @@ export default function FarmSeasons() {
         </div>
         <div className="header-actions">
           <button className="btn-icon" onClick={load}><RefreshCw size={18} /></button>
-          <button id="add-season-btn" className="btn-primary" onClick={() => setShowForm(true)}>
+          <button id="add-season-btn" className="btn-primary" onClick={() => navigate('/farm/seasons/new')}>
             <Plus size={18} /> Tạo mùa vụ
           </button>
         </div>
       </div>
-
-      {/* Create form inline */}
-      {showForm && (
-        <div className="inline-form-card">
-          <div className="inline-form-header">
-            <h3>Tạo mùa vụ mới</h3>
-            <button className="modal-close" onClick={() => setShowForm(false)}><X size={20} /></button>
-          </div>
-          <form onSubmit={handleCreate}>
-            <div className="form-grid">
-              <div className="form-group" style={{ gridColumn: '1/-1' }}>
-                <label>Tên mùa vụ *</label>
-                <input id="season-name" type="text" required placeholder="VD: Vụ Hè Thu 2025"
-                  value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Ngày bắt đầu</label>
-                <input id="season-start" type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Ngày kết thúc</label>
-                <input id="season-end" type="date" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} />
-              </div>
-              <div className="form-group" style={{ gridColumn: '1/-1' }}>
-                <label>Mô tả quy trình</label>
-                <textarea id="season-desc" rows={3} placeholder="Mô tả quy trình canh tác..."
-                  value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-              <button type="button" className="btn-ghost-sm" onClick={() => setShowForm(false)}>Hủy</button>
-              <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }} disabled={saving}>
-                {saving ? <span className="spinner white"></span> : 'Tạo mùa vụ'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="tab-bar">
@@ -158,14 +105,16 @@ export default function FarmSeasons() {
                     <td className="td-muted">{s.endDate || '—'}</td>
                     <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
                     <td>
-                      <Link
-                        id={`season-detail-${s.seasonId}`}
-                        to={`/farm/seasons/${s.seasonId}`}
-                        className="btn-primary-sm"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        Chi tiết
-                      </Link>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <Link
+                          id={`season-detail-${s.seasonId}`}
+                          to={`/farm/seasons/${s.seasonId}`}
+                          className="btn-primary-sm"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          Chi tiết
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );
