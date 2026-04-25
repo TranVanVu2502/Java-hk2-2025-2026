@@ -13,9 +13,9 @@ const STATUS_TABS = [
 ];
 
 const STATUS_META = {
-  IN_PROGRESS: { badge: 'badge-blue',   label: 'Đang canh tác' },
-  EXPORTED:    { badge: 'badge-green',  label: 'Đã xuất' },
-  CANCELLED:   { badge: 'badge-red',    label: 'Đã hủy' },
+  IN_PROGRESS: { badge: 'badge-blue', label: 'Đang canh tác' },
+  EXPORTED: { badge: 'badge-green', label: 'Đã xuất' },
+  CANCELLED: { badge: 'badge-red', label: 'Đã hủy' },
 };
 
 export default function FarmSeasons() {

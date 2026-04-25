@@ -17,13 +17,18 @@ const NAV = {
   FARM_MANAGER: [
     { path: '/farm/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/farm/seasons', label: 'Mùa vụ', icon: BarChart3 },
-    { path: '/farm/orders', label: 'Đơn hàng', icon: ShoppingCart },
+    { path: '/farm/orders', label: 'Đơn hàng', icon: ShoppingCart }
+  ],
+  RETAILER: [
+    { path: '/order', label: 'Giỏ hàng', icon: Package },
+    { path: '/retailer/orders', label: 'Lịch sử đơn hàng', icon: ShoppingCart },
   ],
 };
 
 const ROLE_LABELS = {
   ADMIN: { name: 'Quản trị viên', color: '#e0e7ff', text: '#4338ca' },
   FARM_MANAGER: { name: 'Chủ trang trại', color: '#d1fae5', text: '#047857' },
+  RETAILER: { name: 'Nhà bán lẻ', color: '#fef3c7', text: '#b45309' },
 };
 
 const PAGE_TITLES = {
@@ -33,6 +38,8 @@ const PAGE_TITLES = {
   '/farm/dashboard': 'Dashboard trang trại',
   '/farm/seasons': 'Mùa vụ',
   '/farm/orders': 'Đơn hàng Farm',
+  '/order': 'Giỏ hàng',
+  '/retailer/orders': 'Lịch sử đơn hàng',
 };
 
 /* ── Avatar initials ── */

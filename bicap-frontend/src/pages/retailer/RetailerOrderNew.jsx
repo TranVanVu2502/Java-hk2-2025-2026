@@ -4,7 +4,7 @@ import PublicHeader from '../../components/PublicHeader';
 import { orderService } from '../../api/services';
 import { useOrder } from '../../context/OrderContext';
 import { useAuth } from '../../context/AuthContext';
-import { ShoppingCart, Trash2, ArrowLeft, Leaf, LogOut } from 'lucide-react';
+import { ShoppingCart, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function RetailerOrderNew() {
@@ -65,14 +65,9 @@ export default function RetailerOrderNew() {
       <main style={{ padding: '40px 0 80px' }}>
         <div className="container">
           <div className="page-header" style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className="back-btn" onClick={() => navigate('/products')}>
-                <ArrowLeft size={16} />
-              </button>
-              <div>
-                <h1 className="page-title">Giỏ hàng</h1>
-                <p className="page-subtitle">Kiểm tra sản phẩm trước khi tiến hành đặt hàng</p>
-              </div>
+            <div>
+              <h1 className="page-title">Giỏ hàng</h1>
+              <p className="page-subtitle">Kiểm tra sản phẩm trước khi tiến hành đặt hàng</p>
             </div>
           </div>
 

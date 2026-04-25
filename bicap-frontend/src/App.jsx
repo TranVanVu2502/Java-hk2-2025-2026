@@ -31,6 +31,7 @@ import FarmOrderDetail from './pages/farm/FarmOrderDetail';
 import RetailerOrderNew from './pages/retailer/RetailerOrderNew';
 import RetailerDashboard from './pages/retailer/RetailerDashboard';
 import RetailerOrderDetail from './pages/retailer/RetailerOrderDetail';
+import RetailerProfile from './pages/retailer/RetailerProfile';
 
 /* ── Layout wrappers ── */
 function AdminLayout({ children }) {
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="/retailer" element={<Navigate to="/retailer/orders" replace />} />
             <Route path="/retailer/orders" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerDashboard /></ProtectedRoute>} />
             <Route path="/retailer/orders/:id" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerOrderDetail /></ProtectedRoute>} />
+            <Route path="/retailer/profile" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerProfile /></ProtectedRoute>} />
             <Route path="/order" element={<ProtectedRoute allowedRoles={['RETAILER']}><RetailerOrderNew /></ProtectedRoute>} />
             <Route path="/retailer/*" element={<Navigate to="/retailer/orders" replace />} />
 

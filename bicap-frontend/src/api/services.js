@@ -58,10 +58,9 @@ export const qrService = {
 
 // RETAILER
 export const retailerService = {
-  // POST /api/retailer — đăng ký retailer (body: { name, businessLicense, address })
-  create: (data) => api.post('/api/retailer', data),
-  // GET /api/retailer/me — lấy thông tin retailer hiện tại
-  getMyInfo: () => api.get('/api/retailer/me'),
+  create: (data) => api.post('/api/retailers', data),
+  getMyInfo: () => api.get('/api/retailers/me'),
+  updateMyInfo: (data) => api.put('/api/retailers/me', data),
 };
 
 // ORDER

@@ -2653,3 +2653,48 @@ td>div {
 .btn-primary-sm:active {
   transform: scale(0.97);
 }
+
+/* ── Retailer Dropdown Menu ── */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: #374151;
+  /* gray-700 */
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: #f9fafb;
+  /* gray-50 */
+  color: var(--primary);
+}
+
+.dropdown-item svg {
+  flex-shrink: 0;
+  color: #6b7280;
+  /* gray-500 */
+}
+
+.dropdown-item:hover svg {
+  color: var(--primary);
+}
+
+.dropdown-item.text-danger:hover {
+  color: var(--danger);
+  background-color: #fef2f2;
+  /* red-50 */
+}
+
+.dropdown-item.text-danger:hover svg {
+  color: var(--danger);
+}
