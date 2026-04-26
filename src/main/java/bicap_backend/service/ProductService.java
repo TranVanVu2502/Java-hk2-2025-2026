@@ -7,6 +7,8 @@ import bicap_backend.enity.Product;
 import bicap_backend.enums.ProductStatus;
 import bicap_backend.repository.IFarmingSeasonRepository;
 import bicap_backend.repository.IProductRepository;
+import bicap_backend.repository.IQRCodeRepository;
+import bicap_backend.enity.QRCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ public class ProductService {
 
     private final IProductRepository productRepository;
     private final IFarmingSeasonRepository seasonRepository;
+    private final QRService qrService;
+    private final IQRCodeRepository qrCodeRepository;
 
     public ProductResponse create(ProductRequest request) {
         FarmingSeason season = seasonRepository.findById(request.getSeasonId())
@@ -31,9 +35,15 @@ public class ProductService {
                 .status(ProductStatus.AVAILABLE)
                 .build();
 
+        product = productRepository.save(product);
+        
+        // Tự động tạo QR Code khi tạo sản phẩm mới
+        qrService.generate(product.getProductId());
+        
         return toResponse(product);
     }
 
+    @Transactional(readOnly = true)
     public Page<ProductResponse> getAll(String name, Pageable pageable) {
         if (name != null && !name.isBlank()) {
             return productRepository
@@ -54,13 +64,70 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
         return toResponse(product);
     }
 
+    @Transactional
+    public ProductResponse update(Long id, ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        if (request.getSeasonId() != null) {
+            FarmingSeason season = seasonRepository.findById(request.getSeasonId())
+                    .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
+            product.setSeason(season);
+        }
+
+        product.setName(request.getName());
+        product.setQuantity(request.getQuantity());
+        product.setPrice(request.getPrice());
+
+        product = productRepository.save(product);
+        return toResponse(product);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+        
+        // Xóa mềm: đổi status thành HIDDEN
+        product.setStatus(ProductStatus.HIDDEN);
+        productRepository.save(product);
+    }
+
     private ProductResponse toResponse(Product p) {
+        String qrCodeStr = null;
+        String blockchainHashStr = null;
+        
+        var qrOptional = qrCodeRepository.findByProduct_ProductId(p.getProductId());
+        if (qrOptional.isPresent()) {
+            QRCode qr = qrOptional.get();
+            qrCodeStr = qr.getQrCode();
+            blockchainHashStr = qr.getBlockchainHash();
+        }
+
+        FarmingSeason season = p.getSeason();
+        Long seasonId = null;
+        String seasonName = null;
+        String farmName = null;
+        String farmAddress = null;
+        Long farmId = null;
+
+        if (season != null) {
+            seasonId = season.getSeasonId();
+            seasonName = season.getName();
+            if (season.getFarm() != null) {
+                farmName = season.getFarm().getName();
+                farmAddress = season.getFarm().getAddress();
+                farmId = season.getFarm().getFarmId();
+            }
+        }
+
         return ProductResponse.builder()
                 .productId(p.getProductId())
                 .name(p.getName())
@@ -68,11 +135,13 @@ public class ProductService {
                 .price(p.getPrice())
                 .imageUrl(p.getImageUrl())
                 .status(p.getStatus())
-                .seasonId(p.getSeason().getSeasonId())
-                .seasonName(p.getSeason().getName())
-                .farmName(p.getSeason().getFarm().getName())
-                .farmAddress(p.getSeason().getFarm().getAddress())
+                .qrCode(qrCodeStr)
+                .blockchainHash(blockchainHashStr)
+                .seasonId(seasonId)
+                .seasonName(seasonName)
+                .farmName(farmName)
+                .farmAddress(farmAddress)
+                .farmId(farmId)
                 .build();
     }
 }
-
