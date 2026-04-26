@@ -17,6 +17,7 @@ const NAV = {
   FARM_MANAGER: [
     { path: '/farm/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/farm/seasons', label: 'Mùa vụ', icon: BarChart3 },
+    { path: '/farm/products', label: 'Sản phẩm', icon: Package },
     { path: '/farm/orders', label: 'Đơn hàng', icon: ShoppingCart }
   ],
   RETAILER: [
@@ -37,6 +38,7 @@ const PAGE_TITLES = {
   '/admin/users': 'Quản lý User',
   '/farm/dashboard': 'Dashboard trang trại',
   '/farm/seasons': 'Mùa vụ',
+  '/farm/products': 'Sản phẩm',
   '/farm/orders': 'Đơn hàng Farm',
   '/order': 'Giỏ hàng',
   '/retailer/orders': 'Lịch sử đơn hàng',

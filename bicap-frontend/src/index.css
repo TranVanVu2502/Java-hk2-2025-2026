@@ -542,6 +542,50 @@ ol {
   }
 }
 
+/* ── Form Table (label | input rows) ── */
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.form-table tr {
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.form-table tr:last-child {
+  border-bottom: none;
+}
+
+.form-table td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.form-table td:first-child {
+  width: 200px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  white-space: nowrap;
+  padding-right: 24px;
+}
+
+.form-table td:last-child {
+  width: 100%;
+}
+
+.form-table .form-group {
+  margin: 0;
+  gap: 0;
+}
+
+@media (max-width: 640px) {
+  .form-table td:first-child {
+    width: 120px;
+    font-size: 12px;
+  }
+}
+
 /* Input with icon */
 .input-with-icon {
   position: relative;

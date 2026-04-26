@@ -41,6 +41,8 @@ export const productService = {
   getAll: (name, page = 0, size = 10) =>
     api.get('/api/products', { params: { name, page, size } }),
   getById: (id) => api.get(`/api/products/${id}`),
+  update: (id, data) => api.put(`/api/products/${id}`, data),
+  delete: (id) => api.delete(`/api/products/${id}`),
   uploadImage: (id, file) => {
     const fd = new FormData();
     fd.append('file', file);
