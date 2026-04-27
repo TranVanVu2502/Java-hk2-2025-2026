@@ -358,6 +358,26 @@ ol {
   white-space: nowrap;
 }
 
+.btn-edit-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 7px;
+  border: 1.5px solid #93c5fd;
+  transition: var(--transition);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-edit-sm:hover {
+  background: #dbeafe;
+}
+
 .btn-danger-sm:hover {
   background: #fee2e2;
 }

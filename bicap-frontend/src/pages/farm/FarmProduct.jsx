@@ -107,7 +107,7 @@ export default function FarmProducts() {
                                             <Link
                                                 id={`product-edit-${p.productId}`}
                                                 to={`/farm/products/${p.productId}`}
-                                                className="btn-outline-sm"
+                                                className="btn-edit-sm"
                                                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
                                             >
                                                 <Edit2 size={13} /> Sửa

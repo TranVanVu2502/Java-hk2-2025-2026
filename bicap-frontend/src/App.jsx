@@ -24,10 +24,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import FarmDashboard from './pages/farm/FarmDashboard';
 import FarmSeasons from './pages/farm/FarmSeasons';
 import FarmSeasonForm from './pages/farm/FarmSeasonForm';
-import FarmProducts from './pages/farm/FarmProducts';
+import FarmProducts from './pages/farm/FarmProduct';
 import FarmProductForm from './pages/farm/FarmProductForm';
 import FarmOrders from './pages/farm/FarmOrders';
-import FarmOrderDetail from './pages/farm/FarmOrderDetail';
+import FarmOrderDetail from './pages/farm/FarmOderDetail';
 
 // Retailer
 import RetailerOrderNew from './pages/retailer/RetailerOrderNew';
