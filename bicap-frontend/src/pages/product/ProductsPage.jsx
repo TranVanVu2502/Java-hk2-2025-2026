@@ -4,6 +4,7 @@ import PublicHeader from '../../components/PublicHeader';
 import { productService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
 import { Search, ShoppingBag, Leaf, QrCode, ChevronRight, LogOut } from 'lucide-react';
+import bannerImg from '../../assets/banner.png';
 
 const STATUS_META = {
   AVAILABLE: { badge: 'badge-green', label: 'Còn hàng' },
@@ -56,7 +57,12 @@ export default function ProductsPage() {
       <PublicHeader />
 
       {/* Hero search */}
-      <section className="products-hero">
+      <section className="products-hero" style={{
+        backgroundImage: `url(${bannerImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        padding: '80px 0 60px'
+      }}>
         <div className="container">
           <h1 className="products-hero-title">Nông sản sạch <span className="gradient-text">có truy xuất nguồn gốc</span></h1>
           <form onSubmit={handleSearch} className="products-search-form">
