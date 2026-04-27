@@ -103,26 +103,81 @@ export default function FarmDashboard() {
           <div className="section-card" style={{ marginTop: 20 }}>
             <div className="section-card-header">
               <h3><Building2 size={18} /> {myFarm.name}</h3>
-              <Link to="/farm/seasons" className="btn-primary-sm" style={{ textDecoration: 'none' }}>
-                Xem mùa vụ <ChevronRight size={14} />
-              </Link>
+              <button
+                className="btn-outline-sm"
+                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                onClick={() => {
+                  setForm({
+                    name: myFarm.name || '',
+                    address: myFarm.address || '',
+                    ownerName: myFarm.ownerName || '',
+                    businessLicense: myFarm.businessLicense || ''
+                  });
+                  setShowForm(!showForm);
+                }}
+              >
+                <Edit size={14} /> {showForm ? 'Đóng' : 'Sửa thông tin'}
+              </button>
             </div>
-            <div className="farm-info-grid">
-              {[
-                { label: 'Địa chỉ', value: myFarm.address || '—' },
-                { label: 'Chủ trang trại', value: myFarm.ownerName || '—' },
-                { label: 'Giấy phép KD', value: myFarm.businessLicense || '—' },
-                { label: 'Trạng thái', value: null, badge: myFarm.status },
-              ].map(item => (
-                <div className="farm-info-item" key={item.label}>
-                  <span className="info-label">{item.label}</span>
-                  {item.badge
-                    ? <span className={`badge ${status?.badge}`}>{status?.label}</span>
-                    : <span className="info-value">{item.value}</span>
-                  }
+
+            {showForm ? (
+              <form style={{ padding: 20 }} onSubmit={async (e) => {
+                e.preventDefault();
+                setSaving(true);
+                try {
+                  await farmService.update(myFarm.farmId, form);
+                  toast.success('Cập nhật thông tin thành công!');
+                  setShowForm(false);
+                  reload();
+                } catch (err) {
+                  toast.error('Cập nhật thất bại');
+                } finally {
+                  setSaving(false);
+                }
+              }}>
+                <div className="form-grid">
+                  {[
+                    { label: 'Tên trang trại *', name: 'name', required: true },
+                    { label: 'Địa chỉ', name: 'address' },
+                    { label: 'Tên chủ trang trại', name: 'ownerName' },
+                    { label: 'Giấy phép kinh doanh', name: 'businessLicense' },
+                  ].map(f => (
+                    <div className="form-group" key={f.name}>
+                      <label>{f.label}</label>
+                      <input
+                        type="text"
+                        required={f.required}
+                        value={form[f.name]}
+                        onChange={e => setForm({ ...form, [f.name]: e.target.value })}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+                  <button type="button" className="btn-ghost" onClick={() => setShowForm(false)}>Hủy</button>
+                  <button type="submit" className="btn-primary" disabled={saving}>
+                    {saving ? <span className="spinner white"></span> : 'Lưu thay đổi'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="farm-info-grid">
+                {[
+                  { label: 'Địa chỉ', value: myFarm.address || '—' },
+                  { label: 'Chủ trang trại', value: myFarm.ownerName || '—' },
+                  { label: 'Giấy phép KD', value: myFarm.businessLicense || '—' },
+                  { label: 'Trạng thái', value: null, badge: myFarm.status },
+                ].map(item => (
+                  <div className="farm-info-item" key={item.label}>
+                    <span className="info-label">{item.label}</span>
+                    {item.badge
+                      ? <span className={`badge ${status?.badge}`}>{status?.label}</span>
+                      : <span className="info-value">{item.value}</span>
+                    }
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
