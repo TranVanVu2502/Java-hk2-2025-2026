@@ -1,0 +1,39 @@
+package bicap_backend.enity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import bicap_backend.enums.OrderStatus;
+import java.time.LocalDateTime;
+import java.util.List;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+@Entity
+@Table(name = "`order`")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long orderId;
+
+    @ManyToOne
+    @JoinColumn(name = "retailer_id")
+    private Retailer retailer;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_id")
+    private Farm farm;
+
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
+}
