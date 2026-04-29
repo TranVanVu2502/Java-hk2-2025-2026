@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @Builder
@@ -17,8 +18,14 @@ public class SeasonResponse {
     private Long seasonId;
     private Long farmId;
     private String name;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    
+    private String description;
     private SeasonStatus status;
     private String blockchainHash;
 }

@@ -46,6 +46,7 @@ public class SeasonService {
                 .name(request.getName())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .description(request.getDescription())
                 .status(SeasonStatus.IN_PROGRESS)
                 .build();
 
@@ -102,6 +103,7 @@ public class SeasonService {
         season.setName(request.getName());
         season.setStartDate(request.getStartDate());
         season.setEndDate(request.getEndDate());
+        season.setDescription(request.getDescription());
 
         return toResponse(seasonRepository.save(season));
     }
@@ -152,6 +154,7 @@ public class SeasonService {
                 .name(season.getName())
                 .startDate(season.getStartDate())
                 .endDate(season.getEndDate())
+                .description(season.getDescription())
                 .status(season.getStatus())
                 .blockchainHash(season.getBlockchainHash())
                 .build();
