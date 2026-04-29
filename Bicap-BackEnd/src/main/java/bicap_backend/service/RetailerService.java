@@ -55,8 +55,11 @@ public class RetailerService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        Retailer retailer = retailerRepository.findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+        java.util.Optional<Retailer> opt = retailerRepository.findByUserUserId(user.getUserId());
+        if (opt.isEmpty()) {
+            return null;
+        }
+        Retailer retailer = opt.get();
 
         return RetailerResponse.builder()
                 .retailerId(retailer.getRetailerId())
@@ -74,8 +77,14 @@ public class RetailerService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        Retailer retailer = retailerRepository.findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+        java.util.Optional<Retailer> opt = retailerRepository.findByUserUserId(user.getUserId());
+        Retailer retailer;
+        if (opt.isEmpty()) {
+            retailer = new Retailer();
+            retailer.setUser(user);
+        } else {
+            retailer = opt.get();
+        }
 
         retailer.setName(request.getName());
         retailer.setBusinessLicense(request.getBusinessLicense());

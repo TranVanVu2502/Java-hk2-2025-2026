@@ -37,7 +37,7 @@ public class OrderService {
 
         Retailer retailer = retailerRepository
                 .findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Vui lòng cập nhật hồ sơ nhà bán lẻ trước khi đặt hàng"));
 
         Order order = Order.builder()
                 .retailer(retailer)
@@ -80,9 +80,11 @@ public class OrderService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        Retailer retailer = retailerRepository
-                .findByUserUserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("Retailer không tồn tại"));
+        java.util.Optional<Retailer> optRetailer = retailerRepository.findByUserUserId(user.getUserId());
+        if (optRetailer.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Retailer retailer = optRetailer.get();
 
         List<Order> orders = orderRepository.findByRetailer_RetailerId(retailer.getRetailerId());
 
@@ -99,9 +101,11 @@ public class OrderService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
-        Farm farm = farmRepository.findByUserUserId(user.getUserId()).stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
+        java.util.Optional<Farm> optFarm = farmRepository.findByUserUserId(user.getUserId()).stream().findFirst();
+        if (optFarm.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Farm farm = optFarm.get();
 
         List<Order> orders = orderRepository.findByFarm_FarmId(farm.getFarmId());
 
