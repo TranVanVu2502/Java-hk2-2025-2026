@@ -52,6 +52,13 @@ public class OrderService {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
 
+            if (product.getQuantity() < item.getQuantity()) {
+                throw new RuntimeException("Sản phẩm '" + product.getName() + "' không đủ số lượng trong kho (Còn lại: " + product.getQuantity() + ")");
+            }
+
+            product.setQuantity(product.getQuantity() - item.getQuantity());
+            productRepository.save(product);
+
             if (farm == null) {
                 farm = product.getSeason().getFarm();
             }
@@ -140,6 +147,17 @@ public class OrderService {
 
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new RuntimeException("Chỉ huỷ đơn hàng đang chờ xác nhận");
+        }
+
+        // Hoàn kho khi hủy đơn
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                Product product = detail.getProduct();
+                if (product != null) {
+                    product.setQuantity(product.getQuantity() + detail.getQuantity());
+                    productRepository.save(product);
+                }
+            }
         }
 
         order.setStatus(OrderStatus.CANCELLED);

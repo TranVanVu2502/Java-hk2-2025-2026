@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vechain/connex": "^2.3.2",
     "axios": "^1.15.0",
+    "buffer": "^6.0.3",
+    "Buffer": "^0.0.0",
     "lucide-react": "^1.8.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

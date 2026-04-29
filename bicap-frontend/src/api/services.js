@@ -32,7 +32,7 @@ export const seasonService = {
   getByFarm: (farmId) => api.get(`/api/farms/${farmId}/seasons`),
   getById: (id) => api.get(`/api/seasons/${id}`),
   update: (id, data) => api.put(`/api/seasons/${id}`, data),
-  export: (id) => api.post(`/api/seasons/${id}/export`),
+  export: (id, txId) => api.post(`/api/seasons/${id}/export`, { txId }),
 };
 
 // PRODUCT

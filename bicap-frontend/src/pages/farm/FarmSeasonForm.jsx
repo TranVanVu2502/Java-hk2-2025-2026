@@ -1,13 +1,15 @@
+import { Connex } from '@vechain/connex';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { seasonService } from '../../api/services';
+import { seasonService, productService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Plus, Trash2, Package, CheckCircle, X, Image as ImageIcon, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
     IN_PROGRESS: { badge: 'badge-blue', label: 'Đang canh tác' },
-    EXPORTED: { badge: 'badge-green', label: 'Đã xuất' },
+    HARVESTED: { badge: 'badge-orange', label: 'Đã thu hoạch' },
+    EXPORTED: { badge: 'badge-green', label: 'Đã niêm phong (Blockchain)' },
     CANCELLED: { badge: 'badge-red', label: 'Đã hủy' },
 };
 
@@ -17,176 +19,269 @@ export default function FarmSeasonForm() {
     const { myFarm } = useFarm();
     const isEdit = Boolean(id);
 
-    const [form, setForm] = useState({
-        name: '',
-        startDate: '',
-        endDate: '',
-        description: '',
-    });
-
+    const [form, setForm] = useState({ name: '', startDate: '', endDate: '', description: '' });
     const [season, setSeason] = useState(null);
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [exporting, setExporting] = useState(false);
 
-    useEffect(() => {
-        if (isEdit) {
-            setLoading(true);
-            seasonService.getById(id)
-                .then(res => {
-                    const s = res.data;
-                    setSeason(s);
-                    setForm({
-                        name: s.name || '',
-                        startDate: s.startDate || '',
-                        endDate: s.endDate || '',
-                        description: s.description || '',
-                    });
-                })
-                .catch(() => {
-                    toast.error('Không tìm thấy mùa vụ');
-                    navigate('/farm/seasons');
-                })
-                .finally(() => setLoading(false));
-        }
-    }, [id, isEdit, navigate]);
+    const [isAddingProduct, setIsAddingProduct] = useState(false);
+    const [tempImageFile, setTempImageFile] = useState(null);
+    const [tempImageUrl, setTempImageUrl] = useState('');
+    const [productForm, setProductForm] = useState({ name: '', quantity: '', price: '', description: '' });
+
+    useEffect(() => { if (isEdit) loadSeasonData(); }, [id]);
+
+    const loadSeasonData = async () => {
+        setLoading(true);
+        try {
+            const res = await seasonService.getById(id);
+            setSeason(res.data);
+            setForm({
+                name: res.data.name || '',
+                startDate: res.data.startDate || '',
+                endDate: res.data.endDate || '',
+                description: res.data.description || '',
+            });
+            setProducts(res.data.products || []);
+        } catch (error) {
+            toast.error('Không tìm thấy thông tin mùa vụ');
+            navigate('/farm/seasons');
+        } finally { setLoading(false); }
+    };
+
+    const handleUpdateStatus = async (newStatus) => {
+        if (!window.confirm(`Xác nhận chuyển trạng thái sang: ${STATUS_META[newStatus].label}?`)) return;
+        setSaving(true);
+        try {
+            await seasonService.update(id, { ...form, status: newStatus });
+            toast.success('Cập nhật trạng thái thành công');
+            loadSeasonData();
+        } catch (error) { toast.error('Lỗi khi cập nhật trạng thái'); }
+        finally { setSaving(false); }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setTempImageFile(file);
+        setTempImageUrl(URL.createObjectURL(file));
+    };
+
+    const handleQuickAddProduct = async (e) => {
+        e.preventDefault();
+        if (!productForm.name || !productForm.quantity) return toast.error("Vui lòng nhập tên và số lượng");
+        setSaving(true);
+        try {
+            const payload = { ...productForm, seasonId: id, farmId: myFarm.farmId, status: 'HIDDEN' };
+            const res = await productService.create(payload);
+            if (tempImageFile && res.data.productId) await productService.uploadImage(res.data.productId, tempImageFile);
+            toast.success("Đã thêm sản phẩm");
+            setProductForm({ name: '', quantity: '', price: '', description: '' });
+            setTempImageFile(null);
+            setTempImageUrl('');
+            setIsAddingProduct(false);
+            loadSeasonData();
+        } catch (error) { toast.error("Lỗi khi thêm sản phẩm"); }
+        finally { setSaving(false); }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm("Xác nhận xóa sản phẩm này?")) return;
+        try {
+            await productService.delete(productId);
+            toast.success("Đã xóa");
+            loadSeasonData();
+        } catch (error) { toast.error("Không thể xóa"); }
+    };
+
+    const addProgressStep = (stepText, customDate) => {
+        if (!stepText.trim()) return;
+        const dateToRecord = customDate ? new Date(customDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN');
+        const newStep = `[${dateToRecord}] ${stepText}`;
+        setForm(prev => ({ ...prev, description: prev.description ? `${prev.description}\n${newStep}` : newStep }));
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!myFarm?.farmId) {
-            toast.error('Không tìm thấy thông tin trang trại');
-            return;
-        }
-
+        if (e) e.preventDefault();
         setSaving(true);
         try {
             if (isEdit) {
                 await seasonService.update(id, form);
-                toast.success('Cập nhật thành công');
+                toast.success('Đã cập nhật dữ liệu');
             } else {
-                await seasonService.create(myFarm.farmId, form);
-                toast.success('Thêm mùa vụ thành công');
+                await seasonService.create(myFarm.farmId, { ...form, status: 'IN_PROGRESS' });
+                return navigate('/farm/seasons');
             }
-            navigate('/farm/seasons');
-        } catch {
-            toast.error('Lưu thất bại');
-        } finally {
-            setSaving(false);
-        }
+        } catch { toast.error('Lưu thất bại'); }
+        finally { setSaving(false); }
     };
 
     const handleExport = async () => {
-        if (!confirm('Xuất mùa vụ sẽ đổi trạng thái thành EXPORTED và không thể hoàn tác. Tiếp tục?')) return;
+        if (products.length === 0) return toast.error('Cần ít nhất một sản phẩm để niêm phong!');
+        if (!confirm('Sau khi Niêm phong, bạn KHÔNG THỂ SỬA thông tin. Tiếp tục?')) return;
         setExporting(true);
+        const toastId = toast.loading('Đang ký niêm phong Blockchain...');
         try {
-            await seasonService.export(id);
-            toast.success('Mùa vụ đã được xuất thành công!');
-            navigate('/farm/seasons');
-        } catch { toast.error('Xuất mùa vụ thất bại'); }
+            const connex = window.connex || new Connex({ node: 'https://node-testnet.vechain.energy', network: 'test' });
+            const rawData = `BICAP_SEAL_${id}_PROD_${products.length}`;
+            const hexData = '0x' + Array.from(new TextEncoder().encode(rawData)).map(b => b.toString(16).padStart(2, '0')).join('');
+            const result = await connex.vendor.sign('tx', [{ to: '0x0000000000000000000000000000000000000000', value: '0x0', data: hexData }]).request();
+            await seasonService.export(id, result.txid);
+            toast.success('Niêm phong & Xuất kho thành công!', { id: toastId });
+            loadSeasonData();
+        } catch (error) { toast.error('Giao dịch thất bại', { id: toastId }); }
         finally { setExporting(false); }
     };
 
     if (loading) return <div className="page-loading"><div className="loading-spinner-lg"></div></div>;
 
-    const meta = season ? (STATUS_META[season.status] || STATUS_META.IN_PROGRESS) : null;
-    const isEditable = !isEdit || (season && season.status === 'IN_PROGRESS');
+    const status = season?.status || 'IN_PROGRESS';
+    const isExported = status === 'EXPORTED';
+    const isHarvested = status === 'HARVESTED';
+    const isInProgress = status === 'IN_PROGRESS';
 
     return (
         <div className="page">
-            <div className="page-header" style={{ borderBottom: '1px solid var(--gray-200)', paddingBottom: 16 }}>
+            <div className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <button className="back-btn" onClick={() => navigate('/farm/seasons')}>
-                        <ArrowLeft size={16} />
-                    </button>
+                    <button className="back-btn" onClick={() => navigate('/farm/seasons')}><ArrowLeft size={16} /></button>
                     <div>
-                        <h1 className="page-title">{isEdit ? (season?.name || 'Chi tiết mùa vụ') : 'Thêm Mùa Vụ'}</h1>
-                        <p className="page-subtitle">
-                            {isEdit && meta
-                                ? <span className={`badge ${meta.badge}`}>{meta.label}</span>
-                                : 'Mùa vụ > Thêm mới'}
-                        </p>
+                        <h1 className="page-title">{isEdit ? form.name : 'Thêm Mùa Vụ'}</h1>
+                        <span className={`badge ${STATUS_META[status].badge}`}>{STATUS_META[status].label}</span>
                     </div>
                 </div>
-                {isEdit && isEditable && (
+                {isEdit && !isExported && (
                     <div className="header-actions">
-                        <button id="export-season-btn" className="btn-success-sm" onClick={handleExport} disabled={exporting}>
-                            {exporting ? <span className="spinner"></span> : <><Upload size={14} /> Xuất mùa vụ</>}
-                        </button>
+                        {isInProgress && (
+                            <button type="button" className="btn-primary" onClick={() => handleUpdateStatus('HARVESTED')}>
+                                <CheckCircle size={14} /> Xác nhận Thu hoạch
+                            </button>
+                        )}
+                        {isHarvested && (
+                            <button type="button" className="btn-success-sm" onClick={handleExport} disabled={exporting}>
+                                {exporting ? <span className="spinner"></span> : <><Upload size={14} /> Niêm phong & Xuất kho</>}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
 
-            <form className="section-card" style={{ marginTop: 20 }} onSubmit={handleSubmit}>
-                <div className="section-card-header">
-                    <h3>Thông tin mùa vụ</h3>
-                </div>
-                <div style={{ padding: '24px 32px' }}>
-                    <table className="form-table">
-                        <tbody>
-                            <tr>
-                                <td>Tên mùa vụ <span style={{ color: 'red' }}>*</span></td>
-                                <td>
-                                    <div className="form-group">
-                                        <input id="season-name" required type="text" placeholder="VD: Vụ Hè Thu 2025"
-                                            value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                                            disabled={!isEditable} />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Ngày bắt đầu</td>
-                                <td>
-                                    <div className="form-group">
-                                        <input id="season-start" type="date" value={form.startDate}
-                                            onChange={e => setForm({ ...form, startDate: e.target.value })}
-                                            disabled={!isEditable} />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Ngày kết thúc</td>
-                                <td>
-                                    <div className="form-group">
-                                        <input id="season-end" type="date" value={form.endDate}
-                                            onChange={e => setForm({ ...form, endDate: e.target.value })}
-                                            disabled={!isEditable} />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Mô tả quy trình</td>
-                                <td>
-                                    <div className="form-group">
-                                        <textarea id="season-desc" placeholder="Nhập mô tả quy trình canh tác..." rows={5}
-                                            value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                                            disabled={!isEditable} />
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 24, marginTop: 20 }}>
 
-                {isEditable && (
-                    <div style={{ borderTop: '1px solid var(--gray-200)', padding: '20px 32px', display: 'flex', justifyContent: 'flex-end', gap: 12, background: 'var(--gray-50)', borderBottomLeftRadius: 'var(--radius-lg)', borderBottomRightRadius: 'var(--radius-lg)' }}>
-                        <button type="button" className="btn-ghost" onClick={() => navigate('/farm/seasons')}>
-                            Hủy
-                        </button>
-                        <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 28px' }} disabled={saving}>
-                            {saving ? <span className="spinner white" /> : <><Save size={18} /> {isEdit ? 'Cập nhật' : 'Tạo mùa vụ'}</>}
-                        </button>
+                {/* 1. THÔNG TIN MÙA VỤ */}
+                <form className="section-card" onSubmit={handleSubmit}>
+                    <div className="section-card-header"><h3>Thông tin canh tác</h3></div>
+                    <div style={{ padding: 24 }}>
+                        <div className="form-group">
+                            <label>Tên mùa vụ</label>
+                            <input required className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} disabled={!isInProgress} />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
+                            <div className="form-group">
+                                <label>Ngày bắt đầu</label>
+                                <input type="date" className="form-control" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} disabled={!isInProgress} />
+                            </div>
+                            <div className="form-group">
+                                <label>Ngày thu hoạch (Dự kiến)</label>
+                                <input type="date" className="form-control" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} disabled={!isInProgress} />
+                            </div>
+                        </div>
+                        {isInProgress && (
+                            <button type="submit" className="btn-primary" disabled={saving} style={{ marginTop: 20, width: 'fit-content' }}>
+                                <Save size={18} /> Lưu thông tin
+                            </button>
+                        )}
+                    </div>
+                </form>
+
+                {/* 2. NHẬT KÝ CANH TÁC (Đã đẩy sang phải) */}
+                {isEdit && (
+                    <div className="section-card">
+                        <div className="section-card-header"><h3>Nhật ký canh tác</h3></div>
+                        <div style={{ padding: 24 }}>
+                            <div className="log-display-area" style={{ height: '200px', overflowY: 'auto', background: '#f9fafb', padding: 16, borderRadius: 12, fontSize: 13, whiteSpace: 'pre-wrap', border: '1px solid #eee', marginBottom: isInProgress ? 16 : 0 }}>
+                                {form.description || "Chưa có hoạt động..."}
+                            </div>
+                            {isInProgress && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <textarea id="quick-log-input" className="form-control" placeholder="Ghi chép nhanh..." rows={2}></textarea>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <input id="log-date" type="date" className="form-control" style={{ width: 140 }} defaultValue={new Date().toISOString().split('T')[0]} />
+                                        <button type="button" className="btn-primary" onClick={() => {
+                                            const input = document.getElementById('quick-log-input');
+                                            const date = document.getElementById('log-date').value;
+                                            if (input.value.trim()) { addProgressStep(input.value, date); input.value = ''; toast.success("Đã lưu"); }
+                                        }}>Ghi lại</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
-            </form>
 
-            {isEdit && season?.blockchainHash && (
-                <div className="section-card" style={{ marginTop: 16 }}>
-                    <div className="section-card-header"><h3>🔗 Blockchain Hash</h3></div>
-                    <div style={{ padding: '12px 22px' }}>
-                        <p className="blockchain-hash">{season.blockchainHash}</p>
+                {/* 3. SẢN PHẨM THU HOẠCH (Dàn hàng dưới cùng) */}
+                {isEdit && !isInProgress && (
+                    <div className="section-card" style={{ gridColumn: '1 / -1' }}>
+                        <div className="section-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3>Sản phẩm thu hoạch</h3>
+                            {isHarvested && !isAddingProduct && (
+                                <button className="btn-ghost-sm" onClick={() => setIsAddingProduct(true)}>
+                                    <Plus size={14} /> Thêm sản phẩm
+                                </button>
+                            )}
+                        </div>
+                        <div style={{ padding: 24 }}>
+                            {isAddingProduct && (
+                                <div style={{ background: '#f8fafc', padding: 20, borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 24 }}>
+                                    <div style={{ display: 'flex', gap: 20 }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div
+                                                style={{ width: 80, height: 80, borderRadius: 8, background: '#fff', border: '1px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}
+                                                onClick={() => document.getElementById('quick-img-upload').click()}
+                                            >
+                                                {tempImageUrl ? <img src={tempImageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Camera size={24} color="#94a3b8" />}
+                                            </div>
+                                            <input id="quick-img-upload" type="file" style={{ display: 'none' }} onChange={handleImageChange} accept="image/*" />
+                                        </div>
+                                        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
+                                            <div className="form-group"><label>Tên sản phẩm</label><input className="form-control" value={productForm.name} onChange={e => setProductForm({ ...productForm, name: e.target.value })} /></div>
+                                            <div className="form-group"><label>Số lượng (kg)</label><input className="form-control" type="number" value={productForm.quantity} onChange={e => setProductForm({ ...productForm, quantity: e.target.value })} /></div>
+                                            <div className="form-group"><label>Giá (đ/kg)</label><input className="form-control" type="number" value={productForm.price} onChange={e => setProductForm({ ...productForm, price: e.target.value })} /></div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+                                        <button className="btn-ghost-sm" onClick={() => setIsAddingProduct(false)}>Hủy</button>
+                                        <button className="btn-primary" style={{ width: 'fit-content' }} onClick={handleQuickAddProduct} disabled={saving}>Xác nhận thêm</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+                                {products.length === 0 ? (
+                                    <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#94a3b8', padding: '20px 0' }}>Chưa có sản phẩm.</p>
+                                ) : (
+                                    products.map(p => (
+                                        <div key={p.productId} style={{ display: 'flex', gap: 12, padding: 12, background: '#fff', border: '1px solid #f1f5f9', borderRadius: 12, alignItems: 'center' }}>
+                                            <div style={{ width: 50, height: 50, borderRadius: 8, background: '#f8fafc', overflow: 'hidden', border: '1px solid #eee', flexShrink: 0 }}>
+                                                {p.imageUrl ? <img src={p.imageUrl.startsWith('http') ? p.imageUrl : `http://localhost:8080${p.imageUrl}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ImageIcon size={20} color="#cbd5e1" style={{ margin: '15px auto' }} />}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 600, fontSize: 14 }}>{p.name}</div>
+                                                <div style={{ fontSize: 12, color: '#64748b' }}>{p.quantity} kg • {p.price?.toLocaleString()} đ/kg</div>
+                                            </div>
+                                            {isHarvested && (
+                                                <button onClick={() => handleDeleteProduct(p.productId)} className="text-red" style={{ padding: 8 }}><Trash2 size={16} /></button>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

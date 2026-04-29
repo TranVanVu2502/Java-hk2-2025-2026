@@ -1,5 +1,6 @@
 package bicap_backend.dto.request;
 
+import bicap_backend.enums.ProductStatus;
 import lombok.Data;
 
 @Data
@@ -9,4 +10,5 @@ public class ProductRequest {
     private String name;
     private Double quantity;
     private Double price;
+    private ProductStatus status;
 }

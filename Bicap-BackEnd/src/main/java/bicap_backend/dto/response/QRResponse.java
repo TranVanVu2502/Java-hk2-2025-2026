@@ -14,7 +14,8 @@ import java.time.LocalDate;
 public class QRResponse {
     private String qrCode;
     private String blockchainHash;
-
+    private String blockchainExplorer;
+    
     private Long productId;
     private String productName;
     private Double quantity;

@@ -8,12 +8,14 @@ import toast from 'react-hot-toast';
 const STATUS_TABS = [
   { label: 'Tất cả', value: '' },
   { label: 'Đang canh tác', value: 'IN_PROGRESS' },
+  { label: 'Đang thu hoạch', value: 'HARVESTED' },
   { label: 'Đã xuất', value: 'EXPORTED' },
   { label: 'Đã hủy', value: 'CANCELLED' },
 ];
 
 const STATUS_META = {
   IN_PROGRESS: { badge: 'badge-blue', label: 'Đang canh tác' },
+  HARVESTED: { badge: 'badge-orange', label: 'Đang thu hoạch' },
   EXPORTED: { badge: 'badge-green', label: 'Đã xuất' },
   CANCELLED: { badge: 'badge-red', label: 'Đã hủy' },
 };

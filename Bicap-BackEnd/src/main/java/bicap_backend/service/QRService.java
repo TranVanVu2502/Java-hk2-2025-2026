@@ -72,9 +72,15 @@ public class QRService {
     private QRResponse toResponse(QRCode qr) {
         Product product = qr.getProduct();
         FarmingSeason season = product.getSeason();
+
+        String finalHash = (season != null && season.getBlockchainHash() != null)
+                ? season.getBlockchainHash()
+                : qr.getBlockchainHash();
+
         return QRResponse.builder()
                 .qrCode(qr.getQrCode())
-                .blockchainHash(qr.getBlockchainHash())
+                .blockchainHash(finalHash)
+                .blockchainExplorer("https://insight.vecha.in/#/test/transactions/" + finalHash)
                 .productId(product.getProductId())
                 .productName(product.getName())
                 .quantity(product.getQuantity())

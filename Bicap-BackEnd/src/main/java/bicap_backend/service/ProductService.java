@@ -5,6 +5,7 @@ import bicap_backend.dto.response.ProductResponse;
 import bicap_backend.enity.FarmingSeason;
 import bicap_backend.enity.Product;
 import bicap_backend.enums.ProductStatus;
+import bicap_backend.enums.SeasonStatus;
 import bicap_backend.repository.IFarmingSeasonRepository;
 import bicap_backend.repository.IProductRepository;
 import bicap_backend.repository.IQRCodeRepository;
@@ -32,7 +33,7 @@ public class ProductService {
                 .name(request.getName())
                 .quantity(request.getQuantity())
                 .price(request.getPrice())
-                .status(ProductStatus.AVAILABLE)
+                .status(request.getStatus() != null ? request.getStatus() : ProductStatus.HIDDEN)
                 .build();
 
         product = productRepository.save(product);
@@ -94,13 +95,20 @@ public class ProductService {
     public void delete(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-        
-        // Xóa mềm: đổi status thành HIDDEN
-        product.setStatus(ProductStatus.HIDDEN);
-        productRepository.save(product);
+
+        // Nếu mùa vụ đã xuất (EXPORTED) -> Xóa mềm bằng cách ẩn đi
+        if (product.getSeason() != null && product.getSeason().getStatus() == SeasonStatus.EXPORTED) {
+            product.setStatus(ProductStatus.HIDDEN);
+            productRepository.save(product);
+        } else {
+            // Nếu chưa xuất -> Cho phép xóa hẳn khỏi DB
+            // Xóa QR code liên quan trước để tránh lỗi ràng buộc (nếu có)
+            qrCodeRepository.findByProduct_ProductId(id).ifPresent(qrCodeRepository::delete);
+            productRepository.delete(product);
+        }
     }
 
-    private ProductResponse toResponse(Product p) {
+    public ProductResponse toResponse(Product p) {
         String qrCodeStr = null;
         String blockchainHashStr = null;
         

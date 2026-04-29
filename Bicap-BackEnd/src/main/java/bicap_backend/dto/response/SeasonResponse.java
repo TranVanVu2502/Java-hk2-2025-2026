@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import bicap_backend.enums.OrderStatus;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -28,4 +31,5 @@ public class SeasonResponse {
     private String description;
     private SeasonStatus status;
     private String blockchainHash;
+    private List<ProductResponse> products;
 }

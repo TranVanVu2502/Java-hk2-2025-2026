@@ -42,7 +42,7 @@ export default function RetailerProfile() {
                 await retailerService.updateMyInfo(form);
                 toast.success('Cập nhật thông tin thành công');
             } catch (err) {
-                if (err.response && (err.response.status === 400 || err.response.status === 500)) {
+                if (err.response && err.response.status === 500) {
                     // Fallback if not exists
                     await retailerService.create(form);
                     toast.success('Đã lưu thông tin bán lẻ');

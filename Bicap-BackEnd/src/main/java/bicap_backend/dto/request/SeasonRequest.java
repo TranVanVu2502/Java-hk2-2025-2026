@@ -1,5 +1,6 @@
 package bicap_backend.dto.request;
 
+import bicap_backend.enums.SeasonStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,4 +24,5 @@ public class SeasonRequest {
     private LocalDate endDate;
     
     private String description;
+    private SeasonStatus status;
 }

@@ -1,13 +1,17 @@
 package bicap_backend.service;
 
 import bicap_backend.dto.request.SeasonRequest;
+import bicap_backend.dto.response.ProductResponse;
 import bicap_backend.dto.response.SeasonResponse;
 import bicap_backend.enity.Farm;
 import bicap_backend.enity.FarmingSeason;
+import bicap_backend.enity.Product;
 import bicap_backend.enity.User;
+import bicap_backend.enums.ProductStatus;
 import bicap_backend.enums.SeasonStatus;
 import bicap_backend.repository.IFarmRepository;
 import bicap_backend.repository.IFarmingSeasonRepository;
+import bicap_backend.repository.IProductRepository;
 import bicap_backend.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,16 +28,12 @@ public class SeasonService {
     private final IFarmingSeasonRepository seasonRepository;
     private final IFarmRepository farmRepository;
     private final IUserRepository userRepository;
+    private final IProductRepository productRepository;
+    private final ProductService productService;
 
-    // ─────────────────────────────────────────────────────────────
-    // BICAP-62: TẠO MÙA VỤ MỚI
-    // farmId lấy từ path variable, không cần trong body
-    // ─────────────────────────────────────────────────────────────
     @Transactional
     public SeasonResponse create(Long farmId, SeasonRequest request) {
         User user = getCurrentUser();
-
-        // Kiểm tra farm tồn tại và thuộc về user hiện tại
         Farm farm = farmRepository.findById(farmId)
                 .orElseThrow(() -> new RuntimeException("Farm không tồn tại"));
 
@@ -53,9 +53,6 @@ public class SeasonService {
         return toResponse(seasonRepository.save(season));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // BICAP-63: LẤY DANH SÁCH MÙA VỤ THEO FARM
-    // ─────────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<SeasonResponse> getByFarmId(Long farmId) {
         farmRepository.findById(farmId)
@@ -67,9 +64,6 @@ public class SeasonService {
                 .collect(Collectors.toList());
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // BICAP-64: LẤY CHI TIẾT MÙA VỤ THEO ID
-    // ─────────────────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public SeasonResponse getById(Long seasonId) {
         FarmingSeason season = seasonRepository.findById(seasonId)
@@ -78,13 +72,9 @@ public class SeasonService {
         return toResponse(season);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // BICAP-65: CẬP NHẬT THÔNG TIN MÙA VỤ
-    // ─────────────────────────────────────────────────────────────
     @Transactional
     public SeasonResponse update(Long seasonId, SeasonRequest request) {
         User user = getCurrentUser();
-
         FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
@@ -95,7 +85,6 @@ public class SeasonService {
             throw new RuntimeException("Không có quyền cập nhật mùa vụ này");
         }
 
-        // Chỉ được cập nhật khi mùa vụ đang IN_PROGRESS
         if (season.getStatus() != SeasonStatus.IN_PROGRESS) {
             throw new RuntimeException("Chỉ có thể cập nhật mùa vụ đang IN_PROGRESS");
         }
@@ -105,16 +94,16 @@ public class SeasonService {
         season.setEndDate(request.getEndDate());
         season.setDescription(request.getDescription());
 
+        if (request.getStatus() != null) {
+            season.setStatus(request.getStatus());
+        }
+
         return toResponse(seasonRepository.save(season));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // BICAP-66: XUẤT MÙA VỤ → status = EXPORTED
-    // ─────────────────────────────────────────────────────────────
     @Transactional
-    public SeasonResponse export(Long seasonId) {
+    public SeasonResponse export(Long seasonId, String txId) { 
         User user = getCurrentUser();
-
         FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
 
@@ -125,29 +114,35 @@ public class SeasonService {
             throw new RuntimeException("Không có quyền xuất mùa vụ này");
         }
 
-        // Chỉ được export khi đang IN_PROGRESS
-        if (season.getStatus() != SeasonStatus.IN_PROGRESS) {
-            throw new RuntimeException("Chỉ có thể xuất mùa vụ đang IN_PROGRESS");
+        if (season.getStatus() == SeasonStatus.EXPORTED) {
+            throw new RuntimeException("Mùa vụ này đã được niêm phong rồi");
         }
 
+        season.setBlockchainHash(txId);
         season.setStatus(SeasonStatus.EXPORTED);
+        seasonRepository.save(season);
 
-        return toResponse(seasonRepository.save(season));
+        List<Product> products = productRepository.findBySeasonSeasonId(seasonId);
+        for (Product product : products) {
+            product.setStatus(ProductStatus.AVAILABLE);
+        }
+        productRepository.saveAll(products);
+
+        return toResponse(season);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // HELPER: Lấy User từ SecurityContext (JWT)
-    // ─────────────────────────────────────────────────────────────
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // HELPER: Map entity → response DTO
-    // ─────────────────────────────────────────────────────────────
     private SeasonResponse toResponse(FarmingSeason season) {
+        List<ProductResponse> productResponses = productRepository.findBySeasonSeasonId(season.getSeasonId())
+                .stream()
+                .map(productService::toResponse)
+                .collect(Collectors.toList());
+
         return SeasonResponse.builder()
                 .seasonId(season.getSeasonId())
                 .farmId(season.getFarm().getFarmId())
@@ -157,6 +152,7 @@ public class SeasonService {
                 .description(season.getDescription())
                 .status(season.getStatus())
                 .blockchainHash(season.getBlockchainHash())
+                .products(productResponses)
                 .build();
     }
 }

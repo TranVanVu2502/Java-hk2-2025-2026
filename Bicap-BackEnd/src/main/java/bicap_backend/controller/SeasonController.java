@@ -1,5 +1,6 @@
 package bicap_backend.controller;
 
+import bicap_backend.dto.request.SeasonExportRequest;
 import bicap_backend.dto.request.SeasonRequest;
 import bicap_backend.dto.response.SeasonResponse;
 import bicap_backend.service.SeasonService;
@@ -43,9 +44,10 @@ public class SeasonController {
         return ResponseEntity.ok(seasonService.update(id, request));
     }
 
-    // BICAP-66: POST /api/seasons/{id}/export — Xuất mùa vụ, đổi status = EXPORTED
-    @PostMapping("/api/seasons/{id}/export")
-    public ResponseEntity<SeasonResponse> export(@PathVariable Long id) {
-        return ResponseEntity.ok(seasonService.export(id));
+    @PostMapping("/api/seasons/{id}/export") 
+    public ResponseEntity<SeasonResponse> export(
+            @PathVariable Long id,
+            @RequestBody SeasonExportRequest request) {
+        return ResponseEntity.ok(seasonService.export(id, request.getTxId()));
     }
 }
