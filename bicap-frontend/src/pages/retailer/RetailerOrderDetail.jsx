@@ -51,7 +51,7 @@ export default function RetailerOrderDetail() {
               </p>
             </div>
             {order.status === 'CONFIRMED' && (
-              <button id="confirm-received-btn" className="btn-success-sm" onClick={handleConfirmReceived}>
+              <button id="confirm-received-btn" className="btn-green-sm" onClick={handleConfirmReceived}>
                 <ShoppingCart size={14} /> Xác nhận nhận hàng
               </button>
             )}

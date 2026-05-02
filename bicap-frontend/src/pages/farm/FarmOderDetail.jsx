@@ -67,10 +67,10 @@ export default function FarmOrderDetail() {
                 </div>
                 {order.status === 'PENDING' && (
                     <div className="header-actions">
-                        <button className="btn-success-sm" onClick={handleConfirm}>
+                        <button className="btn-green-sm" onClick={handleConfirm}>
                             <Check size={14} /> Chấp nhận
                         </button>
-                        <button className="btn-danger-sm" onClick={handleCancel}>
+                        <button className="btn-red-sm" onClick={handleCancel}>
                             <X size={14} /> Từ chối
                         </button>
                     </div>

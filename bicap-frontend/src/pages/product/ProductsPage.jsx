@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { Search, ShoppingBag, Leaf, QrCode, ChevronRight, LogOut } from 'lucide-react';
 import bannerImg from '../../assets/banner.png';
 
+const BASE_URL = 'http://localhost:8080';
+
 const STATUS_META = {
   AVAILABLE: { badge: 'badge-green', label: 'Còn hàng' },
   SOLD_OUT: { badge: 'badge-orange', label: 'Hết hàng' },
@@ -57,14 +59,15 @@ export default function ProductsPage() {
       <PublicHeader />
 
       {/* Hero search */}
-      <section className="products-hero" style={{
-        backgroundImage: `url(${bannerImg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        padding: '80px 0 60px'
+      <section className="product-hero has-bg" style={{
+        backgroundImage: `url(${bannerImg})`
       }}>
         <div className="container">
-          <h1 className="products-hero-title">Nông sản sạch <span className="gradient-text">có truy xuất nguồn gốc</span></h1>
+          <div className="product-hero-badge">🌿 100% SẠCH & AN TOÀN</div>
+          <h1 className="product-hero-title">Nông sản sạch <span className="gradient-text">có truy xuất nguồn gốc</span></h1>
+          <p className="product-hero-desc" style={{ color: 'rgba(255,255,255,0.8)', margin: '0 auto 30px' }}>
+            Khám phá danh mục nông sản chất lượng cao, được kiểm định nghiêm ngặt và lưu trữ lịch sử canh tác minh bạch trên Blockchain.
+          </p>
           <form onSubmit={handleSearch} className="products-search-form">
             <div className="qr-input-group">
               <Search size={20} className="qr-input-icon" />
@@ -145,7 +148,7 @@ export default function ProductsPage() {
                       }}>
                         {p.imageUrl ? (
                           <img
-                            src={p.imageUrl.startsWith('http') ? p.imageUrl : `http://localhost:8080${p.imageUrl}`}
+                            src={p.imageUrl.startsWith('http') ? p.imageUrl : `${BASE_URL}${p.imageUrl}`}
                             alt={p.name}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />

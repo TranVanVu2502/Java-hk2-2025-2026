@@ -31,5 +31,6 @@ public class SeasonResponse {
     private String description;
     private SeasonStatus status;
     private String blockchainHash;
+    private String logHash;
     private List<ProductResponse> products;
 }

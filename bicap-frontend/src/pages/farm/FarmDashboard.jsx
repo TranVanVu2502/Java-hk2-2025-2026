@@ -104,8 +104,7 @@ export default function FarmDashboard() {
             <div className="section-card-header">
               <h3><Building2 size={18} /> {myFarm.name}</h3>
               <button
-                className="btn-outline-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                className="btn-primary"
                 onClick={() => {
                   setForm({
                     name: myFarm.name || '',

@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService, seasonService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { ArrowLeft, Save, UploadCloud } from 'lucide-react';
+import { ArrowLeft, Save, UploadCloud, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const BASE_URL = 'http://localhost:8080';
 
 export default function FarmProductForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { myFarm } = useFarm();
-    const isEdit = Boolean(id);
     const [imageFile, setImageFile] = useState(null);
 
     const [form, setForm] = useState({
@@ -22,25 +23,36 @@ export default function FarmProductForm() {
         status: 'HIDDEN'
     });
 
+    const [originalQuantity, setOriginalQuantity] = useState(null);
     const [seasons, setSeasons] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    // Tìm mùa vụ đang được chọn để kiểm tra trạng thái
+    const getFullImageUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('blob:')) return url;
+        return `${BASE_URL}${url}`;
+    };
+
+    // Kiểm tra trạng thái niêm phong của mùa vụ
     const selectedSeason = seasons.find(s => s.seasonId.toString() === form.seasonId.toString());
     const isLocked = selectedSeason?.status === 'EXPORTED';
 
     useEffect(() => {
+        if (!id) {
+            navigate('/farm/products');
+            return;
+        }
+
         if (myFarm?.farmId) {
             seasonService.getByFarm(myFarm.farmId).then(res => {
                 setSeasons(res.data || []);
             }).catch(() => { });
         }
-    }, [myFarm]);
+    }, [myFarm, id]);
 
     useEffect(() => {
-        if (isEdit) {
-            setLoading(true);
+        if (id) {
             productService.getById(id)
                 .then(res => {
                     const prod = res.data;
@@ -52,11 +64,15 @@ export default function FarmProductForm() {
                         imageUrl: prod.imageUrl || '',
                         description: prod.description || '',
                     });
+                    setOriginalQuantity(prod.quantity);
                 })
-                .catch(() => toast.error('Không tìm thấy sản phẩm'))
+                .catch(() => {
+                    toast.error('Không tìm thấy sản phẩm');
+                    navigate('/farm/products');
+                })
                 .finally(() => setLoading(false));
         }
-    }, [id, isEdit]);
+    }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -65,25 +81,31 @@ export default function FarmProductForm() {
             return;
         }
 
+        // Bảo vệ số lượng đã niêm phong
+        if (isLocked && Number(form.quantity) > Number(originalQuantity)) {
+            toast.error(`Số lượng không được vượt quá ${originalQuantity}kg đã niêm phong trên Blockchain`);
+            return;
+        }
+
         setSaving(true);
         try {
-            if (isEdit) {
-                await productService.update(id, form);
-                toast.success('Cập nhật thành công');
-            } else {
-                await productService.create(form);
-                toast.success('Thêm sản phẩm thành công');
+            await productService.update(id, form);
+            toast.success('Cập nhật sản phẩm thành công');
+
+            if (imageFile) {
+                await productService.uploadImage(id, imageFile);
+                toast.success('Đã tải ảnh lên thành công');
             }
+
             navigate('/farm/products');
         } catch (err) {
-            toast.error(err.message || 'Lỗi khi lưu sản phẩm');
+            toast.error(err.response?.data?.message || err.message || 'Lỗi khi lưu sản phẩm');
         } finally {
             setSaving(false);
         }
     };
 
     const handleImageChange = (e) => {
-        if (isLocked) return;
         const file = e.target.files[0];
         if (!file) return;
         setImageFile(file);
@@ -98,27 +120,41 @@ export default function FarmProductForm() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <button className="back-btn" onClick={() => navigate('/farm/products')}><ArrowLeft size={16} /></button>
                     <div>
-                        <h1 className="page-title">{isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}</h1>
-                        {isLocked && <span className="badge badge-green">Dữ liệu đã niêm phong - Hạn chế chỉnh sửa</span>}
+                        <h1 className="page-title">Sửa sản phẩm</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <p className="page-subtitle">Mã sản phẩm: #{id}</p>
+                            {isLocked && (
+                                <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <ShieldCheck size={12} /> Blockchain Verified
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <form className="section-card" style={{ marginTop: 20 }} onSubmit={handleSubmit}>
+                {isLocked && (
+                    <div style={{ padding: '12px 24px', background: '#ecfdf5', borderBottom: '1px solid #d1fae5', color: '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <ShieldCheck size={16} />
+                        Thông tin định danh (Tên, Mùa vụ) đã được niêm phong trên Blockchain và không thể thay đổi.
+                    </div>
+                )}
+
                 <div className="form-grid" style={{ padding: '24px', gridTemplateColumns: '1fr 2fr' }}>
-                    {/* Cột trái: Upload ảnh */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Ảnh sản phẩm</label>
+                        <label style={{ marginBottom: 8, fontWeight: 500 }}>Ảnh sản phẩm</label>
                         <div
                             style={{
                                 border: '2px dashed var(--gray-300)', borderRadius: 8, padding: 40,
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-                                background: 'var(--gray-50)', cursor: isLocked ? 'default' : 'pointer'
+                                background: 'var(--gray-50)', cursor: 'pointer',
+                                height: '280px', justifyContent: 'center'
                             }}
-                            onClick={() => !isLocked && document.getElementById('img-upload').click()}
+                            onClick={() => document.getElementById('img-upload').click()}
                         >
                             {form.imageUrl ? (
-                                <img src={form.imageUrl} alt="preview" style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 8 }} />
+                                <img src={getFullImageUrl(form.imageUrl)} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
                             ) : (
                                 <>
                                     <UploadCloud size={48} color="var(--gray-400)" />
@@ -126,10 +162,9 @@ export default function FarmProductForm() {
                                 </>
                             )}
                         </div>
-                        <input id="img-upload" type="file" style={{ display: 'none' }} onChange={handleImageChange} disabled={isLocked} />
+                        <input id="img-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
                     </div>
 
-                    {/* Cột phải: Thông tin */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                         <div className="form-grid">
                             <div className="form-group">
@@ -139,7 +174,6 @@ export default function FarmProductForm() {
                                     type="text"
                                     value={form.name}
                                     onChange={e => setForm({ ...form, name: e.target.value })}
-                                    disabled={isLocked}
                                 />
                             </div>
                             <div className="form-group">
@@ -148,7 +182,6 @@ export default function FarmProductForm() {
                                     required
                                     value={form.seasonId}
                                     onChange={e => setForm({ ...form, seasonId: e.target.value })}
-                                    disabled={isLocked}
                                 >
                                     <option value="">-- Chọn mùa vụ --</option>
                                     {seasons.map(s => (
@@ -173,10 +206,12 @@ export default function FarmProductForm() {
                                     type="number"
                                     min="0"
                                     step="0.1"
+                                    max={isLocked ? originalQuantity : undefined}
                                     value={form.quantity}
                                     onChange={e => setForm({ ...form, quantity: e.target.value })}
-                                    disabled={isLocked}
+                                    title={isLocked ? `Tối đa ${originalQuantity}kg theo niêm phong` : ""}
                                 />
+                                {isLocked && <small style={{ color: '#6b7280' }}>Tối đa: {originalQuantity}kg (Blockchain)</small>}
                             </div>
                         </div>
 

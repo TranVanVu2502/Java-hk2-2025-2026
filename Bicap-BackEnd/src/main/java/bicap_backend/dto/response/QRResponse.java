@@ -26,7 +26,8 @@ public class QRResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private String description;
-
+    private String finalHash;
+    
     private Long farmId;
     private String farmName;
     private String farmAddress;

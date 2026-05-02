@@ -19,6 +19,7 @@ public class ProductResponse {
     private ProductStatus status;
     private String qrCode;
     private String blockchainHash;
+    private String finalHash;
     private Long seasonId;
     private String seasonName;
     private String farmName;

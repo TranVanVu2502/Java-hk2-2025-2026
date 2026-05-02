@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { seasonService, productService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { ArrowLeft, Save, Upload, Plus, Trash2, Package, CheckCircle, X, Image as ImageIcon, Camera } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Package, CheckCircle, Upload, Camera, ShieldCheck, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
@@ -43,12 +43,21 @@ export default function FarmSeasonForm() {
                 startDate: res.data.startDate || '',
                 endDate: res.data.endDate || '',
                 description: res.data.description || '',
+                blockchainHash: res.data.blockchainHash || ''
             });
             setProducts(res.data.products || []);
         } catch (error) {
             toast.error('Không tìm thấy thông tin mùa vụ');
             navigate('/farm/seasons');
         } finally { setLoading(false); }
+    };
+
+    // Hàm băm dữ liệu SHA-256
+    const sha256 = async (message) => {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     };
 
     const handleUpdateStatus = async (newStatus) => {
@@ -58,8 +67,11 @@ export default function FarmSeasonForm() {
             await seasonService.update(id, { ...form, status: newStatus });
             toast.success('Cập nhật trạng thái thành công');
             loadSeasonData();
-        } catch (error) { toast.error('Lỗi khi cập nhật trạng thái'); }
-        finally { setSaving(false); }
+        } catch (error) {
+            toast.error('Lỗi khi cập nhật trạng thái');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleImageChange = (e) => {
@@ -96,11 +108,20 @@ export default function FarmSeasonForm() {
         } catch (error) { toast.error("Không thể xóa"); }
     };
 
-    const addProgressStep = (stepText, customDate) => {
+    const addProgressStep = async (stepText, customDate) => {
         if (!stepText.trim()) return;
         const dateToRecord = customDate ? new Date(customDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN');
         const newStep = `[${dateToRecord}] ${stepText}`;
-        setForm(prev => ({ ...prev, description: prev.description ? `${prev.description}\n${newStep}` : newStep }));
+
+        const updatedDescription = form.description ? `${form.description}\n${newStep}` : newStep;
+
+        try {
+            await seasonService.update(id, { ...form, description: updatedDescription });
+            setForm(prev => ({ ...prev, description: updatedDescription }));
+            toast.success("Đã ghi nhật ký");
+        } catch {
+            toast.error("Lỗi khi đồng bộ dữ liệu nhật ký");
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -110,9 +131,11 @@ export default function FarmSeasonForm() {
             if (isEdit) {
                 await seasonService.update(id, form);
                 toast.success('Đã cập nhật dữ liệu');
+                loadSeasonData();
             } else {
-                await seasonService.create(myFarm.farmId, { ...form, status: 'IN_PROGRESS' });
-                return navigate('/farm/seasons');
+                const res = await seasonService.create(myFarm.farmId, { ...form, status: 'IN_PROGRESS' });
+                toast.success('Đã tạo mùa vụ thành công!');
+                return navigate(`/farm/seasons/${res.data.seasonId}`);
             }
         } catch { toast.error('Lưu thất bại'); }
         finally { setSaving(false); }
@@ -120,19 +143,47 @@ export default function FarmSeasonForm() {
 
     const handleExport = async () => {
         if (products.length === 0) return toast.error('Cần ít nhất một sản phẩm để niêm phong!');
-        if (!confirm('Sau khi Niêm phong, bạn KHÔNG THỂ SỬA thông tin. Tiếp tục?')) return;
+        if (!confirm('Sau khi Niêm phong, bạn KHÔNG THỂ SỬA thông tin quan trọng. Tiếp tục?')) return;
+
         setExporting(true);
-        const toastId = toast.loading('Đang ký niêm phong Blockchain...');
+        const toastId = toast.loading('Đang tính toán mã băm & ký niêm phong...');
         try {
             const connex = window.connex || new Connex({ node: 'https://node-testnet.vechain.energy', network: 'test' });
-            const rawData = `BICAP_SEAL_${id}_PROD_${products.length}`;
-            const hexData = '0x' + Array.from(new TextEncoder().encode(rawData)).map(b => b.toString(16).padStart(2, '0')).join('');
-            const result = await connex.vendor.sign('tx', [{ to: '0x0000000000000000000000000000000000000000', value: '0x0', data: hexData }]).request();
-            await seasonService.export(id, result.txid);
+
+            const logLines = form.description
+                ? form.description.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "")
+                : [];
+            const finalHash = await sha256(logLines.join(''));
+
+            const sealId = `BICAP_SEAL_${id}_PROD_${products.length}`;
+            const productList = products.map(p => ({ id: p.productId, name: p.name }));
+
+            const sealPayload = {
+                type: 'EXPORTED',
+                sealId: sealId,
+                seasonId: id,
+                seasonName: form.name,
+                finalHash: finalHash,
+                products: productList,
+                ts: new Date().toISOString()
+            };
+
+            const hexData = '0x' + Array.from(new TextEncoder().encode(JSON.stringify(sealPayload))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+            const result = await connex.vendor.sign('tx', [{
+                to: '0x0000000000000000000000000000000000000000',
+                value: '0x0',
+                data: hexData
+            }]).comment(`Xác nhận XUẤT KHO: ${sealId}`).request();
+
+            await seasonService.export(id, result.txid, finalHash);
             toast.success('Niêm phong & Xuất kho thành công!', { id: toastId });
             loadSeasonData();
-        } catch (error) { toast.error('Giao dịch thất bại', { id: toastId }); }
-        finally { setExporting(false); }
+        } catch (error) {
+            toast.error('Giao dịch thất bại hoặc bị hủy', { id: toastId });
+        } finally {
+            setExporting(false);
+        }
     };
 
     if (loading) return <div className="page-loading"><div className="loading-spinner-lg"></div></div>;
@@ -148,19 +199,19 @@ export default function FarmSeasonForm() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <button className="back-btn" onClick={() => navigate('/farm/seasons')}><ArrowLeft size={16} /></button>
                     <div>
-                        <h1 className="page-title">{isEdit ? form.name : 'Thêm Mùa Vụ'}</h1>
+                        <h1 className="page-title">{isEdit ? (form.name || 'Đang tải...') : 'Thêm Mùa Vụ'}</h1>
                         <span className={`badge ${STATUS_META[status].badge}`}>{STATUS_META[status].label}</span>
                     </div>
                 </div>
                 {isEdit && !isExported && (
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', gap: 10 }}>
                         {isInProgress && (
                             <button type="button" className="btn-primary" onClick={() => handleUpdateStatus('HARVESTED')}>
                                 <CheckCircle size={14} /> Xác nhận Thu hoạch
                             </button>
                         )}
                         {isHarvested && (
-                            <button type="button" className="btn-success-sm" onClick={handleExport} disabled={exporting}>
+                            <button type="button" className="btn-primary" onClick={handleExport} disabled={exporting}>
                                 {exporting ? <span className="spinner"></span> : <><Upload size={14} /> Niêm phong & Xuất kho</>}
                             </button>
                         )}
@@ -169,8 +220,6 @@ export default function FarmSeasonForm() {
             </div>
 
             <div className="grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 24, marginTop: 20 }}>
-
-                {/* 1. THÔNG TIN MÙA VỤ */}
                 <form className="section-card" onSubmit={handleSubmit}>
                     <div className="section-card-header"><h3>Thông tin canh tác</h3></div>
                     <div style={{ padding: 24 }}>
@@ -178,51 +227,44 @@ export default function FarmSeasonForm() {
                             <label>Tên mùa vụ</label>
                             <input required className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} disabled={!isInProgress} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
-                            <div className="form-group">
-                                <label>Ngày bắt đầu</label>
-                                <input type="date" className="form-control" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} disabled={!isInProgress} />
-                            </div>
-                            <div className="form-group">
-                                <label>Ngày thu hoạch (Dự kiến)</label>
-                                <input type="date" className="form-control" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} disabled={!isInProgress} />
-                            </div>
+                        <div className="form-group" style={{ marginTop: 16 }}>
+                            <label>Ngày bắt đầu</label>
+                            <input type="date" required className="form-control" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} disabled={!isInProgress} />
                         </div>
                         {isInProgress && (
                             <button type="submit" className="btn-primary" disabled={saving} style={{ marginTop: 20, width: 'fit-content' }}>
-                                <Save size={18} /> Lưu thông tin
+                                <Save size={18} /> {isEdit ? 'Lưu thông tin' : 'Tạo mùa vụ'}
                             </button>
                         )}
                     </div>
                 </form>
 
-                {/* 2. NHẬT KÝ CANH TÁC (Đã đẩy sang phải) */}
-                {isEdit && (
-                    <div className="section-card">
-                        <div className="section-card-header"><h3>Nhật ký canh tác</h3></div>
-                        <div style={{ padding: 24 }}>
-                            <div className="log-display-area" style={{ height: '200px', overflowY: 'auto', background: '#f9fafb', padding: 16, borderRadius: 12, fontSize: 13, whiteSpace: 'pre-wrap', border: '1px solid #eee', marginBottom: isInProgress ? 16 : 0 }}>
-                                {form.description || "Chưa có hoạt động..."}
-                            </div>
-                            {isInProgress && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <textarea id="quick-log-input" className="form-control" placeholder="Ghi chép nhanh..." rows={2}></textarea>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <input id="log-date" type="date" className="form-control" style={{ width: 140 }} defaultValue={new Date().toISOString().split('T')[0]} />
-                                        <button type="button" className="btn-primary" onClick={() => {
-                                            const input = document.getElementById('quick-log-input');
-                                            const date = document.getElementById('log-date').value;
-                                            if (input.value.trim()) { addProgressStep(input.value, date); input.value = ''; toast.success("Đã lưu"); }
-                                        }}>Ghi lại</button>
-                                    </div>
-                                </div>
-                            )}
+                <div className="section-card">
+                    <div className="section-card-header"><h3>Nhật ký canh tác</h3></div>
+                    <div style={{ padding: 24 }}>
+                        <div className="log-display-area" style={{ height: '200px', overflowY: 'auto', background: '#f9fafb', padding: 16, borderRadius: 12, fontSize: 13, whiteSpace: 'pre-wrap', border: '1px solid #eee', marginBottom: (isInProgress && isEdit) ? 16 : 0 }}>
+                            {isEdit ? (form.description || "Chưa có hoạt động") : "Nhật ký sẽ khả dụng sau khi bạn tạo mùa vụ."}
                         </div>
+                        {isInProgress && isEdit && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <textarea id="quick-log-input" className="form-control" placeholder="Ghi chép nhanh..." rows={2}></textarea>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <input id="log-date" type="date" className="form-control" style={{ width: 140 }} defaultValue={new Date().toISOString().split('T')[0]} />
+                                    <button type="button" className="btn-primary" onClick={() => {
+                                        const input = document.getElementById('quick-log-input');
+                                        const date = document.getElementById('log-date').value;
+                                        if (input.value.trim()) {
+                                            addProgressStep(input.value, date);
+                                            input.value = '';
+                                        }
+                                    }}>Ghi nhật ký</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
-                {/* 3. SẢN PHẨM THU HOẠCH (Dàn hàng dưới cùng) */}
-                {isEdit && !isInProgress && (
+                {isEdit && (isHarvested || isExported) && (
                     <div className="section-card" style={{ gridColumn: '1 / -1' }}>
                         <div className="section-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3>Sản phẩm thu hoạch</h3>

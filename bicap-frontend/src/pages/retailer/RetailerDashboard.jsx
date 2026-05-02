@@ -126,12 +126,12 @@ export default function RetailerDashboard() {
                         <td>
                           <div className="action-group">
                             {order.status === 'PENDING' && (
-                              <button id={`cancel-order-${order.orderId}`} className="btn-danger-sm" onClick={() => handleCancel(order.orderId)}>
+                              <button id={`cancel-order-${order.orderId}`} className="btn-red-sm" onClick={() => handleCancel(order.orderId)}>
                                 <XCircle size={14} /> Hủy
                               </button>
                             )}
                             {order.status === 'CONFIRMED' && (
-                              <button id={`cancel-order-${order.orderId}`} className="btn-danger-sm" onClick={() => handleCancel(order.orderId)}>
+                              <button id={`cancel-order-${order.orderId}`} className="btn-red-sm" onClick={() => handleCancel(order.orderId)}>
                                 <XCircle size={14} /> Hủy
                               </button>
                             )}

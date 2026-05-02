@@ -407,7 +407,7 @@ export default function FarmManagerDashboard() {
                                 Sản phẩm
                               </button>
                               {s.status === 'IN_PROGRESS' && (
-                                <button id={`export-season-${s.seasonId}`} className="btn-success-sm" onClick={() => handleExportSeason(s.seasonId)}>
+                                <button id={`export-season-${s.seasonId}`} className="btn-green-sm" onClick={() => handleExportSeason(s.seasonId)}>
                                   Xuất mùa vụ
                                 </button>
                               )}

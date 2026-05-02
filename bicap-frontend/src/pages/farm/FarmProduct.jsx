@@ -5,6 +5,8 @@ import { useFarm } from '../../context/FarmContext';
 import { Plus, Package, RefreshCw, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const BASE_URL = 'http://localhost:8080';
+
 export default function FarmProducts() {
     const { myFarm } = useFarm();
     const navigate = useNavigate();
@@ -54,9 +56,6 @@ export default function FarmProducts() {
                 </div>
                 <div className="header-actions">
                     <button className="btn-icon" onClick={load}><RefreshCw size={18} /></button>
-                    <button id="add-product-btn" className="btn-primary" onClick={() => navigate('/farm/products/new')}>
-                        <Plus size={18} /> Tạo sản phẩm
-                    </button>
                 </div>
             </div>
 
@@ -66,7 +65,8 @@ export default function FarmProducts() {
                 ) : products.length === 0 ? (
                     <div className="empty-table">
                         <Package size={40} />
-                        <p>Chưa có sản phẩm nào. Nhấn "Tạo sản phẩm" để bắt đầu.</p>
+                        <p>Chưa có sản phẩm nào. Hãy thu hoạch sản phẩm trong phần "Mùa vụ" để bắt đầu.</p>
+                        <Link to="/farm/seasons" className="btn-primary" style={{ textDecoration: 'none', width: 'auto', marginTop: 12 }}>Đi tới Mùa vụ</Link>
                     </div>
                 ) : (
                     <table className="data-table">
@@ -88,7 +88,7 @@ export default function FarmProducts() {
                                     <td>
                                         {p.imageUrl ? (
                                             <img
-                                                src={p.imageUrl.startsWith('http') ? p.imageUrl : `http://localhost:8080${p.imageUrl}`}
+                                                src={p.imageUrl.startsWith('http') ? p.imageUrl : `${BASE_URL}${p.imageUrl}`}
                                                 alt={p.name}
                                                 style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: 6 }}
                                             />
@@ -103,22 +103,22 @@ export default function FarmProducts() {
                                     <td className="td-muted">{p.price ? `${Number(p.price).toLocaleString('vi-VN')}₫` : '—'}</td>
                                     <td className="td-muted">{p.seasonName || '—'}</td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: 6 }}>
+                                        <div className="action-group">
                                             <Link
                                                 id={`product-edit-${p.productId}`}
                                                 to={`/farm/products/${p.productId}`}
-                                                className="btn-edit-sm"
-                                                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+                                                className="btn-green-sm"
+                                                style={{ textDecoration: 'none' }}
                                             >
-                                                <Edit2 size={13} /> Sửa
+                                                Chi tiết
                                             </Link>
+
                                             <button
                                                 id={`product-delete-${p.productId}`}
-                                                className="btn-danger-sm"
+                                                className="btn-red-sm"
                                                 onClick={() => handleDelete(p.productId)}
-                                                style={{ display: 'flex', alignItems: 'center', gap: 4 }}
                                             >
-                                                <Trash2 size={13} /> Xóa
+                                                Xóa
                                             </button>
                                         </div>
                                     </td>
@@ -128,6 +128,6 @@ export default function FarmProducts() {
                     </table>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

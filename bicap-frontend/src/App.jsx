@@ -84,7 +84,6 @@ export default function App() {
             <Route path="/farm/seasons/new" element={<FarmLayout><FarmSeasonForm /></FarmLayout>} />
             <Route path="/farm/seasons/:id" element={<FarmLayout><FarmSeasonForm /></FarmLayout>} />
             <Route path="/farm/products" element={<FarmLayout><FarmProducts /></FarmLayout>} />
-            <Route path="/farm/products/new" element={<FarmLayout><FarmProductForm /></FarmLayout>} />
             <Route path="/farm/products/:id" element={<FarmLayout><FarmProductForm /></FarmLayout>} />
             <Route path="/farm/orders" element={<FarmLayout><FarmOrders /></FarmLayout>} />
             <Route path="/farm/orders/:id" element={<FarmLayout><FarmOrderDetail /></FarmLayout>} />

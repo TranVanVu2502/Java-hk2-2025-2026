@@ -29,6 +29,7 @@ public class SeasonService {
     private final IFarmRepository farmRepository;
     private final IUserRepository userRepository;
     private final IProductRepository productRepository;
+    private final IQRCodeRepository qrCodeRepository;
     private final ProductService productService;
 
     @Transactional
@@ -85,8 +86,8 @@ public class SeasonService {
             throw new RuntimeException("Không có quyền cập nhật mùa vụ này");
         }
 
-        if (season.getStatus() != SeasonStatus.IN_PROGRESS) {
-            throw new RuntimeException("Chỉ có thể cập nhật mùa vụ đang IN_PROGRESS");
+        if (season.getStatus() == SeasonStatus.EXPORTED) {
+            throw new RuntimeException("Không thể cập nhật mùa vụ đã niêm phong (EXPORTED)");
         }
 
         season.setName(request.getName());
@@ -96,13 +97,16 @@ public class SeasonService {
 
         if (request.getStatus() != null) {
             season.setStatus(request.getStatus());
+            if (request.getStatus() == SeasonStatus.HARVESTED && season.getEndDate() == null) {
+                season.setEndDate(java.time.LocalDate.now());
+            }
         }
 
         return toResponse(seasonRepository.save(season));
     }
 
     @Transactional
-    public SeasonResponse export(Long seasonId, String txId) { 
+    public SeasonResponse export(Long seasonId, String txId, String logHash) { 
         User user = getCurrentUser();
         FarmingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new RuntimeException("Mùa vụ không tồn tại"));
@@ -119,12 +123,20 @@ public class SeasonService {
         }
 
         season.setBlockchainHash(txId);
+        season.setLogHash(logHash);
         season.setStatus(SeasonStatus.EXPORTED);
         seasonRepository.save(season);
 
+        // Lưu TxID vào từng mã QR của sản phẩm để "niêm phong" sản phẩm đó vĩnh viễn với giao dịch này
         List<Product> products = productRepository.findBySeasonSeasonId(seasonId);
         for (Product product : products) {
             product.setStatus(ProductStatus.AVAILABLE);
+            
+            // Cập nhật hash vào QR Code
+            qrCodeRepository.findByProduct_ProductId(product.getProductId()).ifPresent(qr -> {
+                qr.setBlockchainHash(txId);
+                qrCodeRepository.save(qr);
+            });
         }
         productRepository.saveAll(products);
 
@@ -152,6 +164,7 @@ public class SeasonService {
                 .description(season.getDescription())
                 .status(season.getStatus())
                 .blockchainHash(season.getBlockchainHash())
+                .logHash(season.getLogHash())
                 .products(productResponses)
                 .build();
     }

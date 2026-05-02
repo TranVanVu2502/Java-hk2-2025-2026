@@ -45,4 +45,7 @@ public class FarmingSeason {
 
     @Column(name = "blockchain_hash", length = 255)
     private String blockchainHash;
+
+    @Column(name = "log_hash", length = 255)
+    private String logHash;
 }

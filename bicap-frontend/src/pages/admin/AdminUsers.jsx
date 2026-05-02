@@ -110,11 +110,11 @@ export default function AdminUsers() {
                     </td>
                     <td>
                       <button
-                        className={`btn-action ${u.active ? 'btn-danger-sm' : 'btn-success-sm'}`}
+                        className={`btn-action ${u.active ? 'btn-red-sm' : 'btn-green-sm'}`}
                         onClick={() => handleToggle(u.userId)}
                         id={`toggle-user-${u.userId}`}
                       >
-                        {u.active ? <><Lock size={14}/> Khóa</> : <><Unlock size={14}/> Mở khóa</>}
+                        {u.active ? <><Lock size={14} /> Khóa</> : <><Unlock size={14} /> Mở khóa</>}
                       </button>
                     </td>
                   </tr>

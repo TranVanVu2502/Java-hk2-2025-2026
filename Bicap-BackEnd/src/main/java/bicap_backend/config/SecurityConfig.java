@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints — không cần token
                         .requestMatchers(
+                                "/api/blockchain/**",
                                 "/api/auth/**",
                                 "/api/products/**",
                                 "/api/qr/**",
@@ -45,7 +46,6 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        // Các route khác cần đăng nhập
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
@@ -88,4 +88,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

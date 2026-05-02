@@ -323,7 +323,7 @@ ol {
   transform: translateY(-1px);
 }
 
-.btn-success-sm {
+.btn-green-sm {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -336,14 +336,15 @@ ol {
   border: 1.5px solid var(--emerald-200);
   transition: var(--transition);
   white-space: nowrap;
+  height: 28px;
 }
 
-.btn-success-sm:hover {
+.btn-green-sm:hover {
   background: var(--emerald-100);
   border-color: var(--emerald-400);
 }
 
-.btn-danger-sm {
+.btn-red-sm {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -356,29 +357,11 @@ ol {
   border: 1.5px solid #fca5a5;
   transition: var(--transition);
   white-space: nowrap;
+  height: 28px;
 }
 
-.btn-edit-sm {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 7px;
-  border: 1.5px solid #93c5fd;
-  transition: var(--transition);
-  white-space: nowrap;
-  cursor: pointer;
-}
 
-.btn-edit-sm:hover {
-  background: #dbeafe;
-}
-
-.btn-danger-sm:hover {
+.btn-red-sm:hover {
   background: #fee2e2;
 }
 
@@ -1575,80 +1558,97 @@ td>div {
 }
 
 /* ═══════════════════════════════════════════
-   QR / HERO SECTION
+   UNIFIED PRODUCT HERO SECTION
    ═══════════════════════════════════════════ */
-.qr-hero {
-  padding: 80px 0 64px;
-  background: linear-gradient(160deg, #ecfdf5 0%, #eff6ff 55%, #f5f3ff 100%);
+.product-hero {
+  padding: 60px 0 50px;
+  background: linear-gradient(160deg, #f0fdf4 0%, #eff6ff 50%, #ffffff 100%);
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.qr-hero::before {
+.product-hero.has-bg {
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 80px 0 70px;
+}
+
+.product-hero.has-bg::before {
   content: '';
   position: absolute;
-  top: -180px;
-  right: -180px;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(16, 185, 129, .1) 0%, transparent 70%);
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+  z-index: 0;
 }
 
-.qr-hero::after {
-  content: '';
-  position: absolute;
-  bottom: -100px;
-  left: -100px;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, .07) 0%, transparent 70%);
+.product-hero .container {
+  position: relative;
+  z-index: 2;
 }
 
-.hero-badge {
+.product-hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 16px;
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--emerald-200);
   border-radius: var(--radius-full);
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--emerald-700);
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.hero-title {
+.product-hero.has-bg .product-hero-badge {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(4px);
+}
+
+.product-hero-title {
   font-family: var(--font-display);
-  font-size: clamp(32px, 5vw, 54px);
+  font-size: clamp(28px, 4vw, 48px);
   font-weight: 900;
   color: var(--gray-900);
-  line-height: 1.12;
-  letter-spacing: -.03em;
-  margin-bottom: 18px;
-  position: relative;
-  z-index: 1;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
 }
 
-.gradient-text {
-  background: linear-gradient(120deg, var(--emerald-500), var(--indigo-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.product-hero.has-bg .product-hero-title {
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.hero-desc {
-  font-size: 16px;
-  color: var(--gray-500);
-  max-width: 520px;
-  margin: 0 auto 36px;
-  line-height: 1.7;
-  position: relative;
-  z-index: 1;
+.product-hero-desc {
+  font-size: 15px;
+  color: var(--gray-600);
+  max-width: 580px;
+  margin: 0 auto 30px;
+  line-height: 1.6;
+}
+
+.product-hero.has-bg .product-hero-desc {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.product-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
 }
 
 /* QR search form */
@@ -2038,20 +2038,10 @@ td>div {
 /* ═══════════════════════════════════════════
    PRODUCTS PUBLIC PAGE
    ═══════════════════════════════════════════ */
-.products-hero {
-  padding: 60px 0 48px;
-  background: linear-gradient(160deg, var(--emerald-50) 0%, var(--blue-50) 60%, white 100%);
-  text-align: center;
-}
-
-.products-hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 4vw, 46px);
-  font-weight: 900;
-  color: var(--gray-900);
-  margin-bottom: 28px;
-  line-height: 1.15;
-  letter-spacing: -.03em;
+/* Products specific search spacing */
+.products-search-form {
+  max-width: 650px;
+  margin: 0 auto;
 }
 
 .products-search-form {

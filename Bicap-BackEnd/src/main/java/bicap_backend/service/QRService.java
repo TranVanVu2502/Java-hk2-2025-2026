@@ -35,13 +35,10 @@ public class QRService {
 //      Tạo mã QR riêng biệt
         String code = UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
 
-        // Mock blockchain hash bằng SHA-256
-        String hash = sha256(product.getName() + product.getProductId() + code);
-
         QRCode qrCode = QRCode.builder()
                 .product(product)
                 .qrCode(code)
-                .blockchainHash(hash)
+                .blockchainHash(null) 
                 .build();
 
         qrCodeRepository.save(qrCode);
@@ -73,6 +70,7 @@ public class QRService {
         Product product = qr.getProduct();
         FarmingSeason season = product.getSeason();
 
+        // Ưu tiên lấy Hash từ mùa vụ (niêm phong tổng), nếu không có mới lấy từ QR
         String finalHash = (season != null && season.getBlockchainHash() != null)
                 ? season.getBlockchainHash()
                 : qr.getBlockchainHash();
@@ -80,20 +78,21 @@ public class QRService {
         return QRResponse.builder()
                 .qrCode(qr.getQrCode())
                 .blockchainHash(finalHash)
-                .blockchainExplorer("https://insight.vecha.in/#/test/transactions/" + finalHash)
+                .blockchainExplorer(finalHash != null ? "https://insight.vecha.in/#/test/transactions/" + finalHash : null)
                 .productId(product.getProductId())
                 .productName(product.getName())
                 .quantity(product.getQuantity())
                 .price(product.getPrice())
-                .seasonId(season.getSeasonId())
-                .seasonName(season.getName())
-                .startDate(season.getStartDate())
-                .endDate(season.getEndDate())
-                .description(season.getDescription())
-                .farmId(season.getFarm().getFarmId())
-                .farmName(season.getFarm().getName())
-                .farmAddress(season.getFarm().getAddress())
-                .ownerName(season.getFarm().getOwnerName())
+                .seasonId(season != null ? season.getSeasonId() : null)
+                .seasonName(season != null ? season.getName() : null)
+                .startDate(season != null ? season.getStartDate() : null)
+                .endDate(season != null ? season.getEndDate() : null)
+                .description(season != null ? season.getDescription() : null)
+                .finalHash(season != null ? season.getLogHash() : null)
+                .farmId(season != null && season.getFarm() != null ? season.getFarm().getFarmId() : null)
+                .farmName(season != null && season.getFarm() != null ? season.getFarm().getName() : null)
+                .farmAddress(season != null && season.getFarm() != null ? season.getFarm().getAddress() : null)
+                .ownerName(season != null && season.getFarm() != null ? season.getFarm().getOwnerName() : null)
                 .build();
     }
 }

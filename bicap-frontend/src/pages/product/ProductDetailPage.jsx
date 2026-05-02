@@ -7,6 +7,8 @@ import { useOrder } from '../../context/OrderContext';
 import { Leaf, ArrowLeft, QrCode, Package, MapPin, Calendar, CheckCircle, ShoppingCart, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const BASE_URL = 'http://localhost:8080';
+
 export default function ProductDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -16,6 +18,8 @@ export default function ProductDetailPage() {
     const [loading, setLoading] = useState(true);
     const [qrLoading, setQrLoading] = useState(false);
     const [qrData, setQrData] = useState(null);
+
+    const isRetailer = user?.role === 'RETAILER';
 
     useEffect(() => {
         productService.getById(id)
@@ -91,7 +95,7 @@ export default function ProductDetailPage() {
                         }}>
                             {product.imageUrl ? (
                                 <img
-                                    src={product.imageUrl.startsWith('http') ? product.imageUrl : `http://localhost:8080${product.imageUrl}`}
+                                    src={product.imageUrl.startsWith('http') ? product.imageUrl : `${BASE_URL}${product.imageUrl}`}
                                     alt={product.name}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
@@ -115,18 +119,18 @@ export default function ProductDetailPage() {
                             </button>
                         ) : (
                             <button
-                                onClick={navigate('/login')}
-                                disabled={product.status !== 'AVAILABLE'}
+                                onClick={() => navigate('/login')}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     gap: 8, width: '100%', marginTop: '10px',
                                     padding: '13px 24px',
-                                    background: isRetailer ? '#d1d5db' : '#10b981',
+                                    background: '#d1d5db',
                                     borderRadius: '10px',
-                                    color: 'white', fontWeight: 600, fontSize: 14, border: 'none', 'not-allowed': 'pointer'
+                                    color: 'white', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'not-allowed'
                                 }}
+                                disabled
                             >
-                                <ShoppingCart size={18} />
+                                <ShoppingCart size={18} /> {product.status === 'SOLD_OUT' ? 'Hết hàng' : 'Đã ẩn'}
                             </button>
                         )}
                     </div>

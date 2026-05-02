@@ -48,6 +48,6 @@ public class SeasonController {
     public ResponseEntity<SeasonResponse> export(
             @PathVariable Long id,
             @RequestBody SeasonExportRequest request) {
-        return ResponseEntity.ok(seasonService.export(id, request.getTxId()));
+        return ResponseEntity.ok(seasonService.export(id, request.getTxId(), request.getLogHash()));
     }
 }

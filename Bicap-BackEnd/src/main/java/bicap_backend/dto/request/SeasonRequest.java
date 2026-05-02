@@ -25,4 +25,6 @@ public class SeasonRequest {
     
     private String description;
     private SeasonStatus status;
+
+    private String blockchainHash;
 }

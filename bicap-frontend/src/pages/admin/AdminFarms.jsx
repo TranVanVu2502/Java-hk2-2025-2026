@@ -112,14 +112,14 @@ export default function AdminFarms() {
                                                 <div className="action-group">
                                                     <button
                                                         id={`approve-farm-${farm.farmId}`}
-                                                        className="btn-success-sm"
+                                                        className="btn-green-sm"
                                                         onClick={() => handleApprove(farm.farmId)}
                                                     >
                                                         <CheckCircle size={14} /> Duyệt
                                                     </button>
                                                     <button
                                                         id={`reject-farm-${farm.farmId}`}
-                                                        className="btn-danger-sm"
+                                                        className="btn-red-sm"
                                                         onClick={() => setRejectModal(farm.farmId)}
                                                     >
                                                         <XCircle size={14} /> Từ chối

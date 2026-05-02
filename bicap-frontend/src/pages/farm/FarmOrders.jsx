@@ -124,11 +124,11 @@ export default function FarmOrders() {
                     <td>
                       {order.status === 'PENDING' && (
                         <div className="action-group">
-                          <button id={`confirm-order-${order.orderId}`} className="btn-success-sm"
+                          <button id={`confirm-order-${order.orderId}`} className="btn-green-sm"
                             onClick={() => handleConfirm(order.orderId)}>
                             <Check size={14} /> Chấp nhận
                           </button>
-                          <button id={`reject-order-${order.orderId}`} className="btn-danger-sm"
+                          <button id={`reject-order-${order.orderId}`} className="btn-red-sm"
                             onClick={() => handleCancel(order.orderId)}>
                             <X size={14} /> Từ chối
                           </button>
