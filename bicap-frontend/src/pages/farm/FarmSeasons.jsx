@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { seasonService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
 import { Plus, Calendar, RefreshCw, Edit2 } from 'lucide-react';
@@ -10,21 +10,25 @@ const STATUS_TABS = [
   { label: 'Đang canh tác', value: 'IN_PROGRESS' },
   { label: 'Đang thu hoạch', value: 'HARVESTED' },
   { label: 'Đã xuất', value: 'EXPORTED' },
-  { label: 'Đã hủy', value: 'CANCELLED' },
 ];
 
 const STATUS_META = {
   IN_PROGRESS: { badge: 'badge-blue', label: 'Đang canh tác' },
   HARVESTED: { badge: 'badge-orange', label: 'Đang thu hoạch' },
   EXPORTED: { badge: 'badge-green', label: 'Đã xuất' },
-  CANCELLED: { badge: 'badge-red', label: 'Đã hủy' },
 };
 
 export default function FarmSeasons() {
   const { myFarm } = useFarm();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('status') || '';
+  const setTab = (val) => {
+    if (val) setSearchParams({ status: val });
+    else setSearchParams({});
+  };
+
   const [seasons, setSeasons] = useState([]);
-  const [tab, setTab] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = () => {
@@ -63,6 +67,7 @@ export default function FarmSeasons() {
           </button>
         </div>
       </div>
+
 
       {/* Tabs */}
       <div className="tab-bar">

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Connex } from '@vechain/connex';
 import PublicHeader from '../../components/PublicHeader';
 import { qrService } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
@@ -46,7 +45,7 @@ export default function QRLookupPage() {
       // Đây là cách duy nhất để trang Tra cứu hoạt động được trên mọi trình duyệt mà không cần cài Extension
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
       const res = await fetch(`${apiUrl}/api/blockchain/verify/${txHash}`);
-      
+
       if (!res.ok) {
         setVerification({
           status: 'warning',
@@ -57,7 +56,7 @@ export default function QRLookupPage() {
       }
 
       const tx = await res.json();
-      
+
       if (!tx || !tx.clauses || tx.clauses.length === 0 || !tx.clauses[0].data) {
         setVerification({
           status: 'warning',
@@ -103,7 +102,7 @@ export default function QRLookupPage() {
           setVerification(prev => ({
             ...prev,
             status: 'success',
-            message: 'XÁC THỰC THÀNH CÔNG: Dữ liệu khớp 100% với Blockchain.',
+            message: 'Xác thực thành công: Dữ liệu trùng với thông tin trên Blockchain',
             onChainData: { ...prev.onChainData, ...onChain },
             rawHex: hexData
           }));
@@ -111,7 +110,7 @@ export default function QRLookupPage() {
           setVerification(prev => ({
             ...prev,
             status: 'warning',
-            message: 'CẢNH BÁO: Phát hiện sai lệch dữ liệu so với Blockchain!',
+            message: 'Cảnh báo: Phát hiện sai lệch dữ liệu so với Blockchain!',
             onChainData: { ...prev.onChainData, ...onChain },
             rawHex: hexData
           }));
@@ -135,7 +134,7 @@ export default function QRLookupPage() {
 
   const doSearch = async (c) => {
     if (!c?.trim()) return;
-    
+
     // Nếu người dùng nhập nhầm URL thay vì mã QR
     if (c.trim().startsWith('http')) {
       setVerification({ status: 'error', message: 'Vui lòng nhập mã QR hợp lệ, không phải đường dẫn URL.' });
@@ -196,9 +195,9 @@ export default function QRLookupPage() {
           href={`https://insight.vecha.in/#/test/txs/${hash}`}
           target="_blank"
           rel="noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#64748b', fontWeight: 700, textDecoration: 'none', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 2, fontSize: 8, color: '#64748b', fontWeight: 700, textDecoration: 'none', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}
         >
-          XÁC THỰC GỐC <ExternalLink size={10} />
+          Xem giao dịch Vechain<ExternalLink size={10} />
         </a>
       </div>
     );
@@ -212,10 +211,9 @@ export default function QRLookupPage() {
           <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#94a3b8', border: '4px solid white', marginTop: 4 }}></div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#1e293b' }}>KHỞI TẠO VỤ MÙA</div>
-              {isFromBlockchain && <span style={{ fontSize: 9, background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>NGUỒN: BLOCKCHAIN</span>}
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Bắt đầu vụ mùa</div>
             </div>
-            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>[{data?.startDate ? new Date(data.startDate).toLocaleDateString('vi-VN') : '---'}]</div>
+            <div>[{data?.startDate ? new Date(data.startDate).toLocaleDateString('vi-VN') : '---'}]</div>
           </div>
         </div>
 
@@ -232,8 +230,8 @@ export default function QRLookupPage() {
           <div style={{ display: 'flex', gap: 16, position: 'relative', zIndex: 1 }}>
             <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#059669', border: '4px solid white', marginTop: 4 }}></div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#059669' }}>ĐÃ NIÊM PHONG & XUẤT KHO</div>
-              <div style={{ fontSize: 12, color: '#64748b' }}>[{data?.endDate ? new Date(data.endDate).toLocaleDateString('vi-VN') : '---'}]</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#059669' }}>Xuất kho</div>
+              <div>[{data?.endDate ? new Date(data.endDate).toLocaleDateString('vi-VN') : '---'}]</div>
               <ActionButtons hash={data.blockchainHash} />
             </div>
           </div>
@@ -366,26 +364,16 @@ export default function QRLookupPage() {
                   {renderDescriptionWithLinks(data.description)}
                 </div>
 
-                {/* TECHNICAL PROOF (EXPANDABLE) */}
-                <div style={{ marginTop: 40, borderTop: '1px solid #f1f5f9', padding: '20px' }}>
-                  <details>
-                    <summary style={{ cursor: 'pointer', fontSize: 12, color: '#94a3b8', fontWeight: 700, textAlign: 'center', listStyle: 'none' }}>
-                      [+] HIỂN THỊ CHI TIẾT KỸ THUẬT BLOCKCHAIN
-                    </summary>
-                    <div style={{ marginTop: 16, background: '#f8fafc', padding: 16, borderRadius: '8px', fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all', color: '#64748b' }}>
-                      <div style={{ marginBottom: 8 }}><strong>MÃ BĂM GỐC (FINAL HASH):</strong> {verification.onChainData?.finalHash || 'N/A'}</div>
-                      <div><strong>RAW HEX DATA:</strong> {verification.rawHex}</div>
-                    </div>
-                  </details>
-                </div>
-
               </div>
             ) : (
-              <div className="empty-result" style={{ textAlign: 'center', padding: '80px 0', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                <XCircle size={64} color="#ef4444" style={{ marginBottom: 16 }} />
-                <h3 style={{ fontSize: 20, fontWeight: 800 }}>Không tìm thấy thông tin</h3>
-                <p style={{ color: '#64748b' }}>Mã định danh không tồn tại hoặc dữ liệu chưa được niêm phong trên Blockchain.</p>
-                <button onClick={() => setSearched(false)} className="btn-secondary" style={{ marginTop: 20 }}>Thử lại</button>
+              <div className="empty-state">
+                <ShoppingBag size={56} />
+                <h3>Không tìm thấy sản phẩm nào</h3>
+                <p>Thử từ khóa khác hoặc xem tất cả sản phẩm</p>
+                <button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }}
+                  onClick={() => { setSearch(''); setSearchInput(''); setPage(0); }}>
+                  Xem tất cả sản phẩm
+                </button>
               </div>
             )}
           </div>

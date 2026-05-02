@@ -97,10 +97,13 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
+        // Nếu mùa vụ đã xuất (EXPORTED) -> Xóa mềm bằng cách ẩn đi
         if (product.getSeason() != null && product.getSeason().getStatus() == SeasonStatus.EXPORTED) {
             product.setStatus(ProductStatus.HIDDEN);
             productRepository.save(product);
         } else {
+            // Nếu chưa xuất -> Cho phép xóa hẳn khỏi DB
+            // Xóa QR code liên quan trước để tránh lỗi ràng buộc (nếu có)
             qrCodeRepository.findByProduct_ProductId(id).ifPresent(qrCodeRepository::delete);
             productRepository.delete(product);
         }
@@ -118,14 +121,9 @@ public class ProductService {
         }
 
         FarmingSeason season = p.getSeason();
-        String finalHashStr = null;
         // Nếu QR chưa có Hash, thử lấy Hash niêm phong từ mùa vụ
         if (blockchainHashStr == null && season != null) {
             blockchainHashStr = season.getBlockchainHash();
-        }
-        
-        if (season != null) {
-            finalHashStr = season.getLogHash();
         }
 
         Long seasonId = null;
@@ -153,7 +151,6 @@ public class ProductService {
                 .status(p.getStatus())
                 .qrCode(qrCodeStr)
                 .blockchainHash(blockchainHashStr)
-                .finalHash(finalHashStr)
                 .seasonId(seasonId)
                 .seasonName(seasonName)
                 .farmName(farmName)

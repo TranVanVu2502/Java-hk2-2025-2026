@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { seasonService, productService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { ArrowLeft, Save, Plus, Trash2, Package, CheckCircle, Upload, Camera, ShieldCheck, Image as ImageIcon } from 'lucide-react';
+import { Save, Plus, Trash2, CheckCircle, Upload, Camera, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
     IN_PROGRESS: { badge: 'badge-blue', label: 'Đang canh tác' },
     HARVESTED: { badge: 'badge-orange', label: 'Đã thu hoạch' },
     EXPORTED: { badge: 'badge-green', label: 'Đã niêm phong (Blockchain)' },
-    CANCELLED: { badge: 'badge-red', label: 'Đã hủy' },
 };
 
 export default function FarmSeasonForm() {
@@ -111,9 +110,9 @@ export default function FarmSeasonForm() {
     const addProgressStep = async (stepText, customDate) => {
         if (!stepText.trim()) return;
         const dateToRecord = customDate ? new Date(customDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN');
-        const newStep = `[${dateToRecord}] ${stepText}`;
+        const newStep = `${stepText}\n[${dateToRecord}]`;
 
-        const updatedDescription = form.description ? `${form.description}\n${newStep}` : newStep;
+        const updatedDescription = form.description ? `${form.description}\n\n${newStep}` : newStep;
 
         try {
             await seasonService.update(id, { ...form, description: updatedDescription });
@@ -197,7 +196,6 @@ export default function FarmSeasonForm() {
         <div className="page">
             <div className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <button className="back-btn" onClick={() => navigate('/farm/seasons')}><ArrowLeft size={16} /></button>
                     <div>
                         <h1 className="page-title">{isEdit ? (form.name || 'Đang tải...') : 'Thêm Mùa Vụ'}</h1>
                         <span className={`badge ${STATUS_META[status].badge}`}>{STATUS_META[status].label}</span>
@@ -232,9 +230,11 @@ export default function FarmSeasonForm() {
                             <input type="date" required className="form-control" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} disabled={!isInProgress} />
                         </div>
                         {isInProgress && (
-                            <button type="submit" className="btn-primary" disabled={saving} style={{ marginTop: 20, width: 'fit-content' }}>
-                                <Save size={18} /> {isEdit ? 'Lưu thông tin' : 'Tạo mùa vụ'}
-                            </button>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+                                <button type="submit" className="btn-primary" disabled={saving} style={{ marginTop: 20, width: 'fit-content' }}>
+                                    <Save size={18} /> {isEdit ? 'Lưu thông tin' : 'Tạo mùa vụ'}
+                                </button>
+                            </div>
                         )}
                     </div>
                 </form>
@@ -246,18 +246,37 @@ export default function FarmSeasonForm() {
                             {isEdit ? (form.description || "Chưa có hoạt động") : "Nhật ký sẽ khả dụng sau khi bạn tạo mùa vụ."}
                         </div>
                         {isInProgress && isEdit && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                <textarea id="quick-log-input" className="form-control" placeholder="Ghi chép nhanh..." rows={2}></textarea>
-                                <div style={{ display: 'flex', gap: 8 }}>
-                                    <input id="log-date" type="date" className="form-control" style={{ width: 140 }} defaultValue={new Date().toISOString().split('T')[0]} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16, borderTop: '1px solid #eee', paddingTop: 16 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div className="form-group">
+                                        <textarea
+                                            id="quick-log-input"
+                                            className="form-control"
+                                            placeholder="VD: Bón phân NPK..."
+                                            rows={1}
+                                            style={{ minHeight: '42px', resize: 'none', overflow: 'hidden' }}
+                                            onInput={(e) => {
+                                                e.target.style.height = 'auto';
+                                                e.target.style.height = e.target.scrollHeight + 'px';
+                                            }}
+                                        ></textarea>
+                                    </div>
+                                    <div className="form-group">
+                                        <input id="log-date" type="date" className="form-control" style={{ height: '42px' }} defaultValue={new Date().toISOString().split('T')[0]} />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                     <button type="button" className="btn-primary" onClick={() => {
                                         const input = document.getElementById('quick-log-input');
                                         const date = document.getElementById('log-date').value;
                                         if (input.value.trim()) {
                                             addProgressStep(input.value, date);
                                             input.value = '';
+                                            input.style.height = '42px'; // Reset height
                                         }
-                                    }}>Ghi nhật ký</button>
+                                    }}>
+                                        Ghi nhật ký
+                                    </button>
                                 </div>
                             </div>
                         )}

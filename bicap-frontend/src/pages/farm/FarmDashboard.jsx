@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { farmService } from '../../api/services';
 import { useFarm } from '../../context/FarmContext';
-import { Building2, Plus, CheckCircle, Clock, XCircle, Edit, ChevronRight, Leaf } from 'lucide-react';
+import { Building2, Plus, CheckCircle, Clock, XCircle, Edit, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATUS_META = {
@@ -103,20 +103,22 @@ export default function FarmDashboard() {
           <div className="section-card" style={{ marginTop: 20 }}>
             <div className="section-card-header">
               <h3><Building2 size={18} /> {myFarm.name}</h3>
-              <button
-                className="btn-primary"
-                onClick={() => {
-                  setForm({
-                    name: myFarm.name || '',
-                    address: myFarm.address || '',
-                    ownerName: myFarm.ownerName || '',
-                    businessLicense: myFarm.businessLicense || ''
-                  });
-                  setShowForm(!showForm);
-                }}
-              >
-                <Edit size={14} /> {showForm ? 'Đóng' : 'Sửa thông tin'}
-              </button>
+              <div style={{ width: '20%', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    setForm({
+                      name: myFarm.name || '',
+                      address: myFarm.address || '',
+                      ownerName: myFarm.ownerName || '',
+                      businessLicense: myFarm.businessLicense || ''
+                    });
+                    setShowForm(!showForm);
+                  }}
+                >
+                  <Edit size={14} /> {showForm ? 'Đóng' : 'Sửa thông tin'}
+                </button>
+              </div>
             </div>
 
             {showForm ? (
