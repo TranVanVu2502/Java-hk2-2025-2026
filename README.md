@@ -2,7 +2,7 @@
 ## 1. Tiêu đề và công nghệ sử dụng
 Tiêu đề: Tích hợp Blockchain trong sản xuất nông sản sạch. (Viết tắt: BICAP)
 
-Công nghệ sử dụng: Java Spring Boot, ReactJS, MySQL(TiDB Cloud)...
+Công nghệ sử dụng: Java Spring Boot, ReactJS, MySQL(TiDB Cloud), VechainThor(TestNet)...
 ## 2. Cài đặt và chạy ứng dụng
 1. Clone repo: ```git clone https://github.com/TranVanVu2502/Java-hk2-2025-2026```
 
@@ -38,7 +38,8 @@ Back End:
         │       │   ├── ProductController.java
         │       │   ├── QRController.java
         │       │   ├── RetailerController.java
-        │       │   └── SeasonController.java
+        │       │   ├── SeasonController.java
+        │       │   └── VechainProxyController.java
         │       ├── dto
         │       │   ├── request
         │       │   └── response
@@ -101,7 +102,8 @@ Front End
 │   ├── App.jsx
 │   ├── api
 │   │   ├── axios.js
-│   │   └── services.js
+│   │   ├── services.js
+│   │   └── vechain.js
 │   ├── assets
 │   │   ├── banner.png
 │   │   ├── hero.png
