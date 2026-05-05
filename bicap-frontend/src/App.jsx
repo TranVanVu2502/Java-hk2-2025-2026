@@ -19,6 +19,7 @@ import QRLookupPage from './pages/qr/QRLookupPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminFarms from './pages/admin/AdminFarms';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminProducts from './pages/admin/AdminProducts';
 
 // Farm Manager
 import FarmDashboard from './pages/farm/FarmDashboard';
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
             <Route path="/admin/farms" element={<AdminLayout><AdminFarms /></AdminLayout>} />
             <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+            <Route path="/admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
 
             {/* ── Farm Manager ── */}
             <Route path="/farm" element={<Navigate to="/farm/dashboard" replace />} />

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Users, Building2, LogOut,
   ShoppingCart, Package, Plus, ChevronLeft, ChevronRight,
-  Leaf, BarChart3, QrCode, Menu
+  Leaf, BarChart3, QrCode, Menu, Activity
 } from 'lucide-react';
 
 /* ── Navigation definition ── */
@@ -13,6 +13,7 @@ const NAV = {
     { path: '/admin/dashboard', label: 'Dashboard', icon: BarChart3 },
     { path: '/admin/farms', label: 'Duyệt Farm', icon: Building2 },
     { path: '/admin/users', label: 'Quản lý User', icon: Users },
+    { path: '/admin/products', label: 'Sản phẩm', icon: Package },
   ],
   FARM_MANAGER: [
     { path: '/farm/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -36,6 +37,7 @@ const PAGE_TITLES = {
   '/admin/dashboard': 'Dashboard',
   '/admin/farms': 'Duyệt Farm',
   '/admin/users': 'Quản lý User',
+  '/admin/products': 'Quản lý sản phẩm',
   '/farm/dashboard': 'Dashboard trang trại',
   '/farm/seasons': 'Mùa vụ',
   '/farm/products': 'Sản phẩm',
